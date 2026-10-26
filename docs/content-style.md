@@ -1,5 +1,8 @@
 # Fund Your Deal — content guide for writers
 
+> **Fund Your Deal:** read `docs/brand.md` first — it sets the brand, voice, page plan and the no-copying rule against the Gable Funding site. Where the two differ, `docs/brand.md` wins. Program, guide and state examples below that mention Gable's pages are about structure only.
+
+
 Fund Your Deal (fundyourdeal.org) gives US real estate investors **fast funding for business-purpose loans on investment property**, and is an associate of a licensed lending partner. The borrower deals with Fund Your Deal: the site must read as one company, not a marketplace (Roland, Oct 21 2026). No owner-occupied or consumer loans — ever.
 
 ## Audience and voice
