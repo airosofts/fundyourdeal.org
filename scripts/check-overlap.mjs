@@ -16,7 +16,7 @@ function prose(code) {
     if (words.length < 6) return;
     const codey = words.filter((w) => /[-:/[\]{}=]|^[a-z]+[A-Z]/.test(w) && !/[a-z]-[a-z]/i.test(w.replace(/[^a-z-]/gi, "")) === false).length;
     if (/className|^\s*(flex|grid|text-|bg-|px-|py-)/.test(s) || codey / words.length > 0.4) return;
-    out.push(s);
+    out.push(s.replace(/\s+/g, " ")); // one line, so runs that wrap in the source are still compared
   };
   for (const m of code.matchAll(/"((?:[^"\\\n]|\\.){25,})"/g)) take(m[1]);
   for (const m of code.matchAll(/`([^`]{25,})`/g)) take(m[1].replace(/\$\{[^}]*\}/g, " "));

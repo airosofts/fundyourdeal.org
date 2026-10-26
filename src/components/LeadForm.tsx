@@ -1,17 +1,19 @@
 "use client";
 
-// Lead form v3 (Roland, Oct 23): name and phone first, then qualify, one
-// question per screen. Contract with the admin portal: docs/lead-form.md.
-//   1 contact + call/text consent ("Get Funding" creates the lead)
-//   2 occupancy (owners carry on too: the portal tags them; they're never told)
+// Fund Your Deal's funding request, form v3 (Roland, Oct 23): the contact
+// details come first, then the deal, one question to a screen. The admin
+// portal reads what this saves, so docs/lead-form.md is binding.
+//   1 contact + call/text consent; "Fund My Deal" creates the lead
+//   2 occupancy; an owner-occupant carries on as normal (the portal flags the row, the form says nothing)
 //   3 loan type → purpose → property → amount → credit → [experience] → 9 ZIP
-// Contact and ZIP wait for the save; each tap in between saves in the background.
+// Screens 1 and 9 wait on the server. The taps in between save quietly in the background.
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useId, useRef, useState, type ReactNode } from "react";
 import { captureAttribution, getAttribution, getSessionId, startNewSession } from "@/lib/attribution";
 import { OCCUPANCY_ANSWERS, OCCUPANCY_QUESTION, SHARE_CONSENT_TEXT, SUBMIT_LABEL, TCPA_CONSENT_TEXT } from "@/lib/consent";
+import { SITE } from "@/lib/site";
 import {
   CREDIT,
   EMPTY_ANSWERS,
@@ -31,7 +33,7 @@ import {
 } from "@/lib/leadSpec";
 
 type Preset = { loanType: LoanType; purpose?: Purpose; propertyType?: string };
-/** Screens answered with one tap (contact and ZIP are typed). */
+/** The tap-to-answer screens; contact and ZIP are the two typed ones. */
 type TapScreen = Exclude<Screen, "contact" | "zip">;
 
 const phoneMask = (v: string) => {
@@ -45,7 +47,7 @@ function track(event: string, params: Record<string, unknown> = {}) {
   try {
     (window as unknown as { dataLayer?: unknown[] }).dataLayer?.push({ event, ...params });
   } catch {
-    /* analytics must never break the form */
+    /* a tag manager error is never allowed to stop a lead */
   }
 }
 
@@ -60,12 +62,12 @@ async function save(sessionId: string, step: number, answers: Answers, sourcePag
 
 const QUESTION: Record<TapScreen, string> = {
   occupancy: OCCUPANCY_QUESTION,
-  loanType: "What are you financing?",
-  purpose: "Are you buying or refinancing?",
-  propertyType: "What kind of property?",
-  loanRange: "How much do you need?",
-  credit: "What's your credit score, roughly?",
-  experience: "How many deals have you done in the last 3 years?",
+  loanType: "What kind of deal is it?",
+  purpose: "Is this a purchase or a refinance?",
+  propertyType: "What type of property is it?",
+  loanRange: "How much funding does the deal need?",
+  credit: "Where's your credit score, roughly?",
+  experience: "How many investment deals have you completed in the past 3 years?",
 };
 
 function optionsFor(screen: TapScreen, a: Answers): { value: string; label: string; hint?: string }[] {
@@ -107,10 +109,10 @@ export function LeadForm({ variant = "card", preset }: { variant?: "card" | "pag
   const [honeypot, setHoneypot] = useState("");
   const uid = useId();
   const pathname = usePathname();
-  // Read once per form, so every step lands on the same lead row even if storage is blocked.
+  // Fetched on the first save and then held here: all nine steps update one row, even where the browser blocks storage.
   const sessionId = useRef("");
 
-  // Move focus to each new question so screen readers announce it and phones scroll to it.
+  // Focus jumps to each new heading: screen readers read it out, and on a phone it scrolls into view.
   const headingRef = useRef<HTMLHeadingElement>(null);
   const moved = useRef(false);
   useEffect(() => {
@@ -122,8 +124,8 @@ export function LeadForm({ variant = "card", preset }: { variant?: "card" | "pag
   const at = Math.min(idx, screens.length - 1);
   const screen = screens[at];
 
-  // One save at a time, in order: a quick change of answer (owner → Back →
-  // investment) must land after the save it replaces, not race it.
+  // Saves run single file. If someone taps "owner", goes Back and taps
+  // "investment", the second save has to reach the server after the first.
   const queue = useRef<Promise<unknown>>(Promise.resolve());
   const send = (s: Screen, next: Answers) => {
     const p = queue.current.then(() => save((sessionId.current ||= getSessionId()), stepOf(s), next, pathname, honeypot));
@@ -138,13 +140,13 @@ export function LeadForm({ variant = "card", preset }: { variant?: "card" | "pag
     setIdx(i);
   }
 
-  /** Go to the next screen that still needs an answer (presets skip theirs), saving the answers so far. */
+  /** Saves what's answered, then moves on to the next unanswered screen (a program preset skips its own). */
   function advance(from: number, next: Answers) {
     const list = screensFor(next.loanType);
     let i = from + 1;
     while (i < list.length - 1 && Object.keys(validateScreen(list[i], next)).length === 0) i++;
     const answered = list[i - 1];
-    send(answered, next).catch(() => {}); // partial lead: best effort
+    send(answered, next).catch(() => {}); // a mid-form save may fail; the lead from step 1 is already safe
     track("gf_lead_step", { step: answered, loan_type: next.loanType });
     show(i);
   }
@@ -152,15 +154,15 @@ export function LeadForm({ variant = "card", preset }: { variant?: "card" | "pag
   function pick(s: TapScreen, value: string) {
     const next = { ...a, [FIELD[s]]: value } as Answers;
     if (s === "loanType") {
-      // Drop answers that don't apply to the new loan type.
+      // A new deal type can rule out the purpose or property picked earlier; clear those.
       if (!purposesFor(next.loanType).some((p) => p.id === next.purpose)) next.purpose = "";
       if (!propertyTypesFor(next.loanType).some((p) => p.id === next.propertyType)) next.propertyType = "";
     }
     setA(next);
-    window.setTimeout(() => advance(at, next), 160); // let the tap register visually
+    window.setTimeout(() => advance(at, next), 160); // a short pause so the picked tile shows as selected
   }
 
-  /** Contact (the lead) and ZIP (the finish) wait for the save: a failure shows a retry message, never a fake success. */
+  /** Steps 1 and 9 await the server. If the save fails, the visitor sees a retry message, not a false "done". */
   async function submit(s: "contact" | "zip") {
     const e = validateScreen(s, a);
     setErrors(e);
@@ -174,7 +176,7 @@ export function LeadForm({ variant = "card", preset }: { variant?: "card" | "pag
       await send(s, a);
       if (s === "contact") {
         track("gf_lead_submitted", { loan_type: a.loanType, purpose: a.purpose });
-        show(screens.indexOf("occupancy")); // same session: the questions update this lead
+        show(screens.indexOf("occupancy")); // the session id is kept, so every answer from here fills in this lead
       } else {
         track("gf_lead_completed", { loan_type: a.loanType, purpose: a.purpose, loan_range: a.loanRange });
         startNewSession();
@@ -182,14 +184,14 @@ export function LeadForm({ variant = "card", preset }: { variant?: "card" | "pag
         setDone(true);
       }
     } catch {
-      setSendError("We couldn't send your request. Please try again in a moment.");
+      setSendError("That didn't go through. Give it a moment and try again — your answers are still here.");
     } finally {
       setSending(false);
     }
   }
 
-  // The contact is saved by step 2, so Back stops at the occupancy question.
-  // Earlier screens a preset filled in do show on the way back, so a preset can be changed.
+  // Step 1 is already on the server by now, so Back can't go further than the occupancy screen.
+  // Going back does pass through screens a preset answered, so a preset answer can still be changed.
   const canGoBack = at > screens.indexOf("occupancy");
   const back = () => show(at - 1);
 
@@ -205,7 +207,7 @@ export function LeadForm({ variant = "card", preset }: { variant?: "card" | "pag
     </p>
   );
 
-  const submitClass = "min-h-[56px] rounded-xl bg-brand px-8 text-[17px] font-semibold text-white hover:bg-brand-deep disabled:opacity-60";
+  const submitClass = "min-h-[56px] rounded-full bg-brand px-8 text-[17px] font-bold text-white hover:bg-brand-deep disabled:opacity-60";
   const progress = done ? 1 : (at + 1) / (screens.length + 1);
 
   let body: ReactNode;
@@ -217,19 +219,19 @@ export function LeadForm({ variant = "card", preset }: { variant?: "card" | "pag
             <path d="M3 8.5l3 3 7-7" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
         </div>
-        {heading(`You're all set, ${a.first.trim() || "thanks"}.`)}
-        <p className="text-[17px] leading-relaxed text-ink-2">A Fund Your Deal loan specialist will call you shortly to go over your deal.</p>
+        {heading(a.first.trim() ? `Your deal is in, ${a.first.trim()}.` : "Your deal is in.")}
+        <p className="text-[17px] leading-relaxed text-ink-2">A {SITE.name} loan specialist will call you soon to talk it through.</p>
         <ol className="flex list-decimal flex-col gap-2.5 pl-5 text-base leading-relaxed text-ink-2">
-          <li>A quick call to confirm the property, the numbers and your timeline.</li>
-          <li>Your terms in writing, so you can lock the deal in.</li>
-          <li>Close fast and get funded.</li>
+          <li>A short call about the property, the numbers and the date you need to close.</li>
+          <li>Your terms in writing — amount, rate and costs — before you commit to anything.</li>
+          <li>You sign at closing, and the deal is funded.</li>
         </ol>
         <div className="flex flex-wrap gap-3">
-          <Link href="/calculators" className="inline-flex min-h-12 items-center rounded-xl border border-ink px-5 font-semibold hover:bg-ink hover:text-white">
-            Run your numbers
+          <Link href="/calculators" className="inline-flex min-h-12 items-center rounded-full border-2 border-ink px-5 font-bold hover:bg-ink hover:text-white">
+            Check the deal in a calculator
           </Link>
-          <Link href="/guides" className="inline-flex min-h-12 items-center rounded-xl px-5 font-semibold text-brand hover:bg-brand-tint">
-            Read the investor guides
+          <Link href="/guides" className="inline-flex min-h-12 items-center rounded-full px-5 font-bold text-brand hover:bg-brand-tint">
+            Read the deal guides
           </Link>
         </div>
       </div>
@@ -252,14 +254,14 @@ export function LeadForm({ variant = "card", preset }: { variant?: "card" | "pag
           </label>
         </div>
         <div className="flex flex-col gap-2.5">
-          <div className="font-mono text-[13px] uppercase tracking-[0.06em] text-brand">Fast funding · about 60 seconds</div>
-          {heading("Let's get your deal funded.")}
+          <div className="font-mono text-[13px] uppercase tracking-[0.06em] text-brand">Deal funding · about a minute</div>
+          {heading("Who should we call about this deal?")}
         </div>
         <div className="grid gap-4 sm:grid-cols-2">
           <TextField id={`${uid}-first`} label="First name" autoComplete="given-name" value={a.first} onChange={(v) => setA({ ...a, first: v })} error={errors.first} />
           <TextField id={`${uid}-last`} label="Last name" autoComplete="family-name" value={a.last} onChange={(v) => setA({ ...a, last: v })} error={errors.last} />
           <TextField id={`${uid}-email`} label="Email (optional)" type="email" inputMode="email" autoComplete="email" value={a.email} onChange={(v) => setA({ ...a, email: v })} error={errors.email} />
-          <TextField id={`${uid}-phone`} label="Mobile phone" type="tel" inputMode="tel" autoComplete="tel-national" placeholder="(555) 555-0100" mono value={a.phone} onChange={(v) => setA({ ...a, phone: phoneMask(v) })} error={errors.phone} />
+          <TextField id={`${uid}-phone`} label="Mobile number" type="tel" inputMode="tel" autoComplete="tel-national" placeholder="(555) 555-0100" mono value={a.phone} onChange={(v) => setA({ ...a, phone: phoneMask(v) })} error={errors.phone} />
         </div>
         <div className="flex flex-col gap-2">
           <label htmlFor={`${uid}-tcpa`} className={`grid cursor-pointer grid-cols-[24px_1fr] items-start gap-3 rounded-xl border bg-white p-4 text-sm leading-relaxed text-ink-2 ${errors.tcpa ? "border-warn" : "border-field"}`}>
@@ -300,15 +302,15 @@ export function LeadForm({ variant = "card", preset }: { variant?: "card" | "pag
         }}
         className="flex flex-col gap-5"
       >
-        {heading("Last step — where's the property?")}
+        {heading("Final question: where's the deal?")}
         <div className="sm:max-w-[260px]">
-          <TextField id={`${uid}-zip`} label="Property ZIP code" inputMode="numeric" autoComplete="off" placeholder="78704" mono value={a.zip} onChange={(v) => setA({ ...a, zip: v.replace(/\D/g, "").slice(0, 5) })} error={errors.zip} />
+          <TextField id={`${uid}-zip`} label="ZIP code of the property" inputMode="numeric" autoComplete="off" placeholder="30310" mono value={a.zip} onChange={(v) => setA({ ...a, zip: v.replace(/\D/g, "").slice(0, 5) })} error={errors.zip} />
         </div>
         {retry}
         <div className="flex items-center justify-between gap-3 border-t border-line pt-5">
           <BackButton onClick={back} />
           <button type="submit" disabled={sending} className={submitClass}>
-            {sending ? "Sending…" : "Finish"}
+            {sending ? "Sending…" : "Send my deal"}
           </button>
         </div>
       </form>
@@ -318,7 +320,7 @@ export function LeadForm({ variant = "card", preset }: { variant?: "card" | "pag
     const value = a[FIELD[s]] as string;
     body = (
       <div className="flex flex-col gap-5">
-        {s === "occupancy" && a.first.trim() && <p className="-mb-2 text-[15px] font-medium text-brand">Thanks, {a.first.trim()} — a few quick taps so your loan specialist is ready.</p>}
+        {s === "occupancy" && a.first.trim() && <p className="-mb-2 text-[15px] font-medium text-brand">Got it, {a.first.trim()}. Now the deal itself, one tap per answer, so your specialist calls with the numbers in hand.</p>}
         {heading(QUESTION[s])}
         <fieldset className="grid gap-2.5 sm:grid-cols-2">
           <legend className="sr-only">{QUESTION[s]}</legend>
@@ -335,7 +337,7 @@ export function LeadForm({ variant = "card", preset }: { variant?: "card" | "pag
         </fieldset>
         <div className="flex items-center justify-between gap-3 border-t border-line pt-4">
           {canGoBack ? <BackButton onClick={back} /> : <span />}
-          <span className="font-mono text-xs text-muted">Tap an answer to continue</span>
+          <span className="font-mono text-xs text-muted">One tap moves you on</span>
         </div>
       </div>
     );
@@ -347,7 +349,7 @@ export function LeadForm({ variant = "card", preset }: { variant?: "card" | "pag
         <div className="flex flex-col gap-2">
           <div className="flex justify-between font-mono text-[12px] text-ink-2">
             <span>{`STEP ${at + 1} OF ${screens.length}`}</span>
-            <span>No credit pull to apply</span>
+            <span>This won&apos;t pull your credit</span>
           </div>
           <div className="h-1.5 overflow-hidden rounded-full bg-line" aria-hidden="true">
             <div className="h-full rounded-full bg-brand transition-[width] duration-300" style={{ width: `${Math.round(progress * 100)}%` }} />
@@ -363,10 +365,10 @@ export function LeadForm({ variant = "card", preset }: { variant?: "card" | "pag
   }
 
   const rows: [string, string | undefined][] = [
-    ["Loan", LOAN_TYPES.find((t) => t.id === a.loanType)?.label],
-    ["Purpose", purposesFor(a.loanType).find((p) => p.id === a.purpose)?.label],
+    ["Deal", LOAN_TYPES.find((t) => t.id === a.loanType)?.label],
+    ["Buy or refi", purposesFor(a.loanType).find((p) => p.id === a.purpose)?.label],
     ["Property", propertyTypesFor(a.loanType).find((p) => p.id === a.propertyType)?.label],
-    ["Amount", LOAN_RANGES.find((r) => r.id === a.loanRange)?.label],
+    ["Funding", LOAN_RANGES.find((r) => r.id === a.loanRange)?.label],
     ["Credit", a.credit || undefined],
   ];
   return (
@@ -374,7 +376,7 @@ export function LeadForm({ variant = "card", preset }: { variant?: "card" | "pag
       <div className="min-w-0 flex-[999_1_560px] rounded-[20px] border border-line bg-white p-6 sm:p-8">{card}</div>
       <aside className="flex flex-[1_1_300px] flex-col gap-4">
         <div className="flex flex-col gap-3.5 rounded-[20px] bg-ink p-6 text-paper">
-          <div className="font-mono text-xs tracking-[0.08em] text-lime">YOUR REQUEST</div>
+          <div className="font-mono text-xs tracking-[0.08em] text-lime">YOUR DEAL SO FAR</div>
           <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-2.5 text-[15px]">
             {rows.map(([k, v]) => (
               <Row key={k} k={k} v={v} />
@@ -382,9 +384,9 @@ export function LeadForm({ variant = "card", preset }: { variant?: "card" | "pag
           </dl>
         </div>
         <ul className="flex flex-col gap-4 rounded-[20px] border border-line bg-white p-6 text-[15px] leading-normal text-ink-2">
-          <Trust title="Fast answers.">A loan specialist calls you back quickly to go over the deal.</Trust>
-          <Trust title="Close fast.">Short-term loans close in days, not months.</Trust>
-          <Trust title="No credit pull to apply.">This form never touches your credit.</Trust>
+          <Trust title="Straight to the numbers.">Your loan specialist calls about this deal: the price, the rehab, the rent and your exit.</Trust>
+          <Trust title="Your closing date comes first.">Say when you have to close, and the timeline is planned back from that date.</Trust>
+          <Trust title="Your credit stays untouched.">Sending this request doesn&apos;t pull your credit.</Trust>
         </ul>
       </aside>
     </div>
@@ -393,7 +395,7 @@ export function LeadForm({ variant = "card", preset }: { variant?: "card" | "pag
 
 function BackButton({ onClick }: { onClick: () => void }) {
   return (
-    <button type="button" onClick={onClick} className="min-h-11 rounded-xl border border-field px-4 text-[15px] font-semibold hover:border-ink">
+    <button type="button" onClick={onClick} className="min-h-11 rounded-full border border-field px-4 text-[15px] font-semibold hover:border-ink">
       ← Back
     </button>
   );

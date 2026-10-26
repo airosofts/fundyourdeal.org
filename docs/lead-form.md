@@ -7,13 +7,13 @@ portal.
 
 This file is the contract between the site (`src/lib/leadSpec.ts`,
 `src/components/LeadForm.tsx`, `src/app/api/leads/route.ts`) and the admin portal
-(`~/Documents/fundyourdeal-adminportal`). Change both together.
+(`~/Documents/gablefunding-adminportal`, shared with Gable Funding). Change both together.
 
 ## Screens (step = 1-based position; the server re-validates every earlier screen)
 
 | Step | Screen | Asks | Values |
 |---|---|---|---|
-| 1 | `contact` | First name, last name, email (optional), mobile phone, call/text consent checkbox (required). Button "Get Funding". | — |
+| 1 | `contact` | First name, last name, email (optional), mobile phone, call/text consent checkbox (required). Button "Fund My Deal" (`SUBMIT_LABEL`; Gable's says "Get Funding"). | — |
 | 2 | `occupancy` | "Will you or a family member live in the property?" | `investment` (no, it's an investment property) · `owner` (yes) |
 | 3 | `loanType` | What are you financing? | dscr · str · flip · rehab_rental · bridge · construction · portfolio |
 | 4 | `purpose` | Buying or refinancing? | purchase · refinance · cashout (rental loans only) |
@@ -42,9 +42,12 @@ preset screens are skipped but still saved.
 - **Step 9:** `property_zip`, `property_state`, `completed = true`, `completed_at`.
   Analytics event: `gf_lead_completed`.
 
-Columns added by `airobase/004_contact_first.sql` (`occupancy`, `contact_captured_at`,
-`site`) are written in a separate best-effort update, so a lead is never lost if that
-migration hasn't run; the same values are always in `answers`.
+Columns added by `airobase/004_contact_first.sql` (`occupancy`, `contact_captured_at`)
+are written in a separate best-effort update, so a lead is never lost if that
+migration hasn't run; the same values are always in `answers`. Fund Your Deal writes
+`site = 'fundyourdeal'` in the main save instead: 004 is already applied to the shared
+database, and the column defaults to `'gablefunding'`, so a failed follow-up would
+otherwise file the lead under the wrong site.
 
 ## Older rows
 

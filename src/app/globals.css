@@ -1,51 +1,68 @@
 @import "tailwindcss";
 
-/* Design tokens — one place to restyle the whole site. */
+/* Fund Your Deal tokens: deep navy ink, signal-orange actions, apricot highlights on dark.
+   Every component uses these names through Tailwind classes: change values here, never names.
+   Contrast (WCAG 2.x): ink/paper 14.9, ink-2/paper 8.5, muted/paper 5.6, brand/paper 4.7,
+   white/brand 5.1, lime/ink 8.0, mist/ink 9.2, mist-2/night 5.2, field/white 3.4 (UI). */
 @theme inline {
+  /* layout.tsx sets --font-geist-*; they now carry Plus Jakarta Sans and JetBrains Mono. */
   --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
   --font-mono: var(--font-geist-mono), ui-monospace, monospace;
 
-  --color-paper: #f5f6f2; /* page ground */
-  --color-ink: #0d1411; /* text, dark sections */
-  --color-ink-2: #3c4642; /* secondary text */
-  --color-muted: #5d6862; /* captions (4.5:1 on paper) */
-  --color-line: #dce0da;
-  --color-line-2: #e7eae5;
-  --color-field: #c9cfc8; /* input borders */
-  --color-brand: #1e5e46; /* actions */
-  --color-brand-deep: #174a37;
-  --color-brand-tint: #e6f0e9;
-  --color-lime: #cdeb6e; /* highlight on dark */
-  --color-night: #131c18;
-  --color-night-line: #26302b;
-  --color-mist: #b7c0ba; /* secondary text on dark */
-  --color-mist-2: #98a39c;
-  --color-warn: #9a2b1b;
+  --color-paper: #f4f6fa; /* page ground, cool white */
+  --color-ink: #0e2042; /* deep navy: text, header, dark bands */
+  --color-ink-2: #3a4864; /* secondary text */
+  --color-muted: #56637d; /* captions (5.6:1 on paper) */
+  --color-line: #d7dde8;
+  --color-line-2: #e6eaf1;
+  --color-field: #808da4; /* input borders (3:1 on white and paper) */
+  --color-brand: #c4410d; /* actions and links */
+  --color-brand-deep: #a1360b; /* hover / pressed */
+  --color-brand-tint: #fef1ea;
+  --color-lime: #ff9f5e; /* apricot: the highlight on dark */
+  --color-night: #172d57; /* raised panels and hovers on navy */
+  --color-night-line: #2a4170;
+  --color-mist: #b8c4da; /* secondary text on dark */
+  --color-mist-2: #93a1bd;
+  --color-warn: #b21f3a;
 }
 
-html {
-  scroll-behavior: smooth;
-}
-body {
-  background: var(--color-paper);
-  color: var(--color-ink);
-  font-family: var(--font-sans);
-  -webkit-font-smoothing: antialiased;
-}
-:focus-visible {
-  outline: 2px solid var(--color-brand);
-  outline-offset: 2px;
-}
-details > summary {
-  list-style: none;
-  cursor: pointer;
-}
-details > summary::-webkit-details-marker {
-  display: none;
-}
-details[open] .faq-plus {
-  transform: rotate(45deg);
-}
-input[type="number"]::-webkit-inner-spin-button {
-  opacity: 0.4;
+/* In the base layer, so utilities (e.g. focus-visible:outline-lime on dark) can override these. */
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+  body {
+    background: var(--color-paper);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  h1,
+  h2,
+  h3 {
+    text-wrap: balance;
+  }
+  ::selection {
+    background: var(--color-lime);
+    color: var(--color-ink);
+  }
+  :focus-visible {
+    outline: 2px solid var(--color-brand);
+    outline-offset: 2px;
+  }
+  details > summary {
+    list-style: none;
+    cursor: pointer;
+  }
+  details > summary::-webkit-details-marker {
+    display: none;
+  }
+  details[open] .faq-plus {
+    transform: rotate(45deg);
+  }
+  input[type="number"]::-webkit-inner-spin-button {
+    opacity: 0.4;
+  }
 }

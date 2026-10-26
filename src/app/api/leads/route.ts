@@ -1,14 +1,15 @@
-// Investor lead capture (form v3, contact first; contract: docs/lead-form.md).
-// One row per form (session_id), saved screen by screen:
-//   1 contact + share and call/text consents → the lead exists from here
-//   2 occupancy: investment, or owner (kept, but tagged status 'disqualified' /
-//     lost_reason 'Owner-occupied' while the lead is still 'new')
+// Fund Your Deal funding requests → gf_leads (form v3; the shared admin portal
+// reads these rows, so docs/lead-form.md is binding). Each form session is one
+// row, keyed on session_id, filled in screen by screen:
+//   1 contact + terms and call/text consent: the row, and the lead, start here
+//   2 occupancy. "owner" is kept; while the lead is still 'new' it gets status
+//     'disqualified' and lost_reason 'Owner-occupied'
 //   3 loan type  4 purpose  5 property type  6 loan amount  7 credit
 //   8 experience (project loans only)  9 property ZIP → completed
-// Every save re-validates all earlier screens, so a lead can't skip ahead.
-// last_step never goes down, and once a lead is completed further saves are
-// no-ops. Columns from newer migrations are written in a separate best-effort
-// update at the end, so a lead is never lost if one of them hasn't run yet.
+// The server re-checks every earlier screen on each save, so no step can be
+// skipped. last_step only rises, and a completed row ignores later saves.
+// Columns that later SQL files added go in a second, best-effort update, so
+// a missing migration can never cost us the lead itself.
 
 import { NextResponse, type NextRequest } from "next/server";
 import { ATTRIBUTION_KEYS, type Attribution } from "@/lib/attribution";
@@ -19,6 +20,7 @@ import {
   FINAL_STEP,
   FORM_VERSION,
   SHARE_CONSENT_VERSION,
+  SITE_KEY,
   TCPA_CONSENT_VERSION,
   isProject,
   stateForZip,
@@ -35,10 +37,10 @@ type Payload = {
   answers?: Partial<Answers>;
   sourcePage?: string;
   attribution?: Attribution;
-  website?: string; // honeypot: real people never fill it
+  website?: string; // hidden trap field; only bots type into it
 };
 
-/** The saved row, read with select("*") so a column a migration hasn't added yet is simply missing. */
+/** The row as stored. select("*") means a column from an unrun migration just comes back absent. */
 type Existing = {
   last_step: number;
   completed: boolean;
@@ -50,7 +52,7 @@ type Existing = {
   contact_captured_at?: string | null; // airobase/004
 };
 
-const SITE_KEY = "fundyourdeal";
+// SITE_KEY ("fundyourdeal", from leadSpec) goes in answers.site and, via the 004 extras below, the site column.
 const OWNER_OCCUPIED = "Owner-occupied";
 const SQL_004 = "airobase/004_contact_first.sql";
 
@@ -78,7 +80,7 @@ function cleanAttribution(a: Attribution | undefined) {
 export async function POST(req: NextRequest) {
   const body = await readJson<Payload>(req);
   if (!body) return fail("bad_json");
-  if (body.website) return NextResponse.json({ success: true }); // bot: pretend it worked
+  if (body.website) return NextResponse.json({ success: true }); // a bot filled the trap: answer "ok", save nothing
 
   const sessionId = typeof body.sessionId === "string" ? body.sessionId.trim() : "";
   const step = Number(body.step);
@@ -105,7 +107,7 @@ export async function POST(req: NextRequest) {
 
   const ip = clientIp(req);
   const now = new Date().toISOString();
-  // A v2 row (its session id can still be in a returning visitor's browser) numbered its steps differently.
+  // A returning browser may still hold a session id from a form v2 row, whose step numbers meant other screens.
   const sameForm = prev?.answers?.formVersion === FORM_VERSION;
   const capturedAt = prev?.contact_captured_at || prev?.answers?.contactCapturedAt || now;
   const investment = a.occupancy === "investment";
@@ -114,9 +116,13 @@ export async function POST(req: NextRequest) {
     session_id: sessionId,
     last_step: prev && sameForm ? Math.max(prev.last_step, step) : step,
     answers: { ...a, formVersion: FORM_VERSION, site: SITE_KEY, contactCapturedAt: capturedAt, ...(investment && { businessPurposeText: BUSINESS_PURPOSE_TEXT }) },
+    // In the main write, not the best-effort one: the column defaults to Gable's
+    // key, so a failed follow-up would file this lead under the wrong site.
+    // (gf_leads.site comes from airobase/004, already applied to the shared database.)
+    site: SITE_KEY,
     ...cleanAttribution(body.attribution),
   };
-  // Columns added after 001, keyed by the SQL file that adds them.
+  // Post-001 columns, grouped under the SQL file that creates them (named in the log if a write fails).
   const extras: Record<string, Record<string, unknown>> = { [SQL_004]: { site: SITE_KEY } };
 
   if (!prev) {
@@ -124,8 +130,8 @@ export async function POST(req: NextRequest) {
     Object.assign(row, { ip_address: ip, ...geo, ...requestMeta(req), source_page: body.sourcePage?.slice(0, 300) || null });
   }
 
-  // Step 1 is the lead: contact details and both consents (clicking "Get Funding").
-  // Later saves carry the same contact, so they only fill it in if it's missing.
+  // Step 1 makes the lead: name, phone, email and both consents (pressing "Fund My Deal").
+  // Every later save resends the contact, but it's only written when the row lacks it.
   if (step === stepOf("contact") || !prev?.share_consent_at) {
     Object.assign(row, {
       first_name: a.first,
@@ -145,7 +151,7 @@ export async function POST(req: NextRequest) {
   }
   if (!prev?.contact_captured_at) extras[SQL_004].contact_captured_at = capturedAt;
 
-  // Step 2: owners stay leads; the portal sees them as disqualified.
+  // Step 2. An owner-occupant remains a lead, shown in the portal as disqualified.
   if (step >= stepOf("occupancy")) {
     extras[SQL_004].occupancy = a.occupancy;
     if (investment) {
@@ -155,9 +161,9 @@ export async function POST(req: NextRequest) {
       Object.assign(row, { business_purpose_confirmed: false, business_purpose_at: null, business_purpose_version: null });
     }
     const status = prev?.status ?? "new";
-    let reason: string | null | undefined; // undefined: leave the status alone
+    let reason: string | null | undefined; // stays undefined when the status shouldn't change
     if (!investment && status === "new") reason = OWNER_OCCUPIED;
-    else if (investment && status === "disqualified" && prev?.lost_reason === OWNER_OCCUPIED) reason = null; // picked "owner" by mistake
+    else if (investment && status === "disqualified" && prev?.lost_reason === OWNER_OCCUPIED) reason = null; // "owner" was a slip; they went back and changed it
     if (reason !== undefined) {
       row.status = reason ? "disqualified" : "new";
       extras["admin portal sql/002_admin_portal.sql"] = { lost_reason: reason, status_updated_at: now };
@@ -178,9 +184,10 @@ export async function POST(req: NextRequest) {
     return fail("db_error", 500);
   }
 
-  // Best effort: the lead is already saved, and these values are in `answers`
-  // too. One update; if it fails (a migration hasn't run), each file's columns
-  // are retried on their own so the others still land.
+  // The lead is stored by now and `answers` holds these values as well, so
+  // this part is best effort. All extras go in a single update first. Should
+  // that fail (usually an unrun migration), each SQL file's group is sent
+  // separately, and only the missing group is lost.
   const all = Object.assign({}, ...Object.values(extras)) as Record<string, unknown>;
   const { error: e2 } = await db.from(TABLES.leads).update(all).eq("session_id", sessionId);
   if (e2) {

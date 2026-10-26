@@ -2,7 +2,7 @@ import type { ReactNode } from "react";
 import { Breadcrumbs, Container, Eyebrow, JsonLd } from "./ui";
 import { SITE } from "@/lib/site";
 
-/** Page heading: breadcrumbs (+ BreadcrumbList schema), eyebrow, H1, intro. */
+/** Page heading: breadcrumbs (+ BreadcrumbList schema), eyebrow, H1, an orange rule, intro. */
 export function PageIntro({ crumbs, eyebrow, title, children, aside }: { crumbs: { href?: string; label: string }[]; eyebrow?: string; title: string; children?: ReactNode; aside?: ReactNode }) {
   return (
     <section>
@@ -13,11 +13,12 @@ export function PageIntro({ crumbs, eyebrow, title, children, aside }: { crumbs:
           itemListElement: crumbs.map((c, i) => ({ "@type": "ListItem", position: i + 1, name: c.label, ...(c.href ? { item: SITE.url + c.href } : {}) })),
         }}
       />
-      <Container className="flex flex-wrap items-end justify-between gap-6 pb-6 pt-12">
-        <div className="flex max-w-[760px] flex-col gap-3.5">
+      <Container className="flex flex-wrap items-end justify-between gap-6 pb-8 pt-10 sm:pt-14">
+        <div className="flex min-w-0 max-w-[780px] flex-col gap-4">
           <Breadcrumbs items={crumbs} />
           {eyebrow && <Eyebrow>{eyebrow}</Eyebrow>}
-          <h1 className="text-[clamp(38px,4.6vw,60px)] font-semibold leading-[1.04] tracking-[-0.04em]">{title}</h1>
+          <h1 className="break-words text-[clamp(36px,4.4vw,58px)] font-bold leading-[1.04] tracking-[-0.035em]">{title}</h1>
+          <span aria-hidden="true" className="block h-1.5 w-14 rounded-full bg-brand" />
           {children && <div className="text-lg leading-relaxed text-ink-2">{children}</div>}
         </div>
         {aside}

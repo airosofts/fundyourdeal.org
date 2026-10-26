@@ -1,8 +1,10 @@
 "use client";
 
+import Link from "next/link";
 import { useState, type ReactNode } from "react";
+import { SITE } from "@/lib/site";
 
-// Contact form: plain fields, server-side validation, one POST.
+// Contact form: topic chips, a few plain fields, server-side validation, one POST to /api/contact.
 
 type Status = "idle" | "sending" | "done" | "error";
 
@@ -25,23 +27,35 @@ function useSubmit(url: string) {
   return { status, errors, submit };
 }
 
-const input = "min-h-[52px] w-full rounded-[10px] border border-field bg-white px-3.5 text-base text-ink";
+/** Topic values are the ones /api/contact accepts. */
+const TOPICS = [
+  { value: "loan", label: "Funding for a deal" },
+  { value: "existing_request", label: "A deal I already sent in" },
+  { value: "press", label: "Press or media" },
+  { value: "other", label: "Anything else" },
+];
 
-function F({ id, label, error, children, optional }: { id: string; label: string; error?: string; children: ReactNode; optional?: boolean }) {
+const input = "min-h-[52px] w-full rounded-lg border border-field bg-paper px-3.5 text-base text-ink focus:bg-white";
+
+function Field({ id, label, error, children, optional }: { id: string; label: string; error?: string; children: ReactNode; optional?: boolean }) {
   return (
     <div className="flex flex-col gap-1.5">
-      <label htmlFor={id} className="text-sm font-medium">
+      <label htmlFor={id} className="text-sm font-semibold">
         {label} {optional && <span className="font-normal text-muted">(optional)</span>}
       </label>
       {children}
-      {error && <p className="text-sm font-medium text-warn">{error}</p>}
+      {error && (
+        <p id={`${id}-error`} className="text-sm font-medium text-warn">
+          {error}
+        </p>
+      )}
     </div>
   );
 }
 
 function Done({ children }: { children: ReactNode }) {
   return (
-    <div role="status" className="rounded-[20px] border border-line bg-white p-7 text-[17px] leading-relaxed">
+    <div role="status" className="flex flex-col gap-2 rounded-2xl border border-ink bg-white p-7 text-[16px] leading-relaxed text-ink-2">
       {children}
     </div>
   );
@@ -59,10 +73,23 @@ export function ContactForm() {
   const [hp, setHp] = useState("");
   const on = (k: keyof typeof v) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => setV((x) => ({ ...x, [k]: e.target.value }));
 
-  if (status === "done") return <Done>Thanks — your message is with us. We&apos;ll get back to you soon.</Done>;
+  if (status === "done") {
+    return (
+      <Done>
+        <span className="text-[19px] font-semibold text-ink">Message received.</span>
+        <span>
+          Look for a reply at {v.email || "the email address you gave us"}. If it&apos;s a live deal with a closing date, the{" "}
+          <Link href="/get-funding" className="font-semibold text-ink underline underline-offset-4">
+            60-second funding form
+          </Link>{" "}
+          puts it in front of a loan specialist sooner.
+        </span>
+      </Done>
+    );
+  }
   return (
     <form
-      className="relative flex flex-col gap-5 rounded-[20px] border border-line bg-white p-6 sm:p-7"
+      className="relative flex flex-col gap-6 rounded-2xl border border-ink bg-white p-6 sm:p-8"
       noValidate
       onSubmit={(e) => {
         e.preventDefault();
@@ -70,31 +97,57 @@ export function ContactForm() {
       }}
     >
       <Honeypot value={hp} onChange={setHp} />
+      <fieldset className="flex flex-col gap-2.5">
+        <legend className="mb-2.5 text-sm font-semibold">What&apos;s this about?</legend>
+        <div className="flex flex-wrap gap-2">
+          {TOPICS.map((t) => (
+            <label
+              key={t.value}
+              className="cursor-pointer rounded-full border border-field px-4 py-2 text-sm font-medium text-ink-2 transition-colors hover:border-ink has-[:checked]:border-ink has-[:checked]:bg-ink has-[:checked]:text-white has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-brand"
+            >
+              <input type="radio" name="topic" value={t.value} checked={v.topic === t.value} onChange={on("topic")} className="sr-only" />
+              {t.label}
+            </label>
+          ))}
+        </div>
+      </fieldset>
       <div className="grid gap-4 sm:grid-cols-2">
-        <F id="c-name" label="Name" error={errors.name}>
-          <input id="c-name" className={input} autoComplete="name" value={v.name} onChange={on("name")} />
-        </F>
-        <F id="c-email" label="Email" error={errors.email}>
-          <input id="c-email" type="email" className={input} autoComplete="email" value={v.email} onChange={on("email")} />
-        </F>
-        <F id="c-phone" label="Phone" optional>
+        <Field id="c-name" label="Your name" error={errors.name}>
+          <input id="c-name" className={input} autoComplete="name" value={v.name} onChange={on("name")} aria-invalid={Boolean(errors.name)} />
+        </Field>
+        <Field id="c-email" label="Email address" error={errors.email}>
+          <input id="c-email" type="email" className={input} autoComplete="email" value={v.email} onChange={on("email")} aria-invalid={Boolean(errors.email)} />
+        </Field>
+        <Field id="c-phone" label="Phone number" optional>
           <input id="c-phone" type="tel" className={input} autoComplete="tel" value={v.phone} onChange={on("phone")} />
-        </F>
-        <F id="c-topic" label="Topic">
-          <select id="c-topic" className={input} value={v.topic} onChange={on("topic")}>
-            <option value="loan">A loan for my deal</option>
-            <option value="existing_request">A request I already sent</option>
-            <option value="press">Press</option>
-            <option value="other">Something else</option>
-          </select>
-        </F>
+        </Field>
       </div>
-      <F id="c-msg" label="Message" error={errors.message}>
-        <textarea id="c-msg" rows={5} className={`${input} py-3`} value={v.message} onChange={on("message")} />
-      </F>
-      {status === "error" && !Object.keys(errors).length && <p className="text-sm font-medium text-warn">That didn&apos;t go through. Please try again.</p>}
-      <button type="submit" disabled={status === "sending"} className="min-h-[52px] self-start rounded-xl bg-brand px-7 font-semibold text-white hover:bg-brand-deep disabled:opacity-60">
-        {status === "sending" ? "Sending…" : "Send message"}
+      <Field id="c-msg" label="Your message" error={errors.message}>
+        <textarea
+          id="c-msg"
+          rows={5}
+          className={`${input} py-3`}
+          placeholder="The property, the price, the loan you need and when you have to close."
+          value={v.message}
+          onChange={on("message")}
+          aria-invalid={Boolean(errors.message)}
+        />
+      </Field>
+      {status === "error" && !Object.keys(errors).length && (
+        <p role="alert" className="text-sm font-medium text-warn">
+          Your message didn&apos;t send. Give it another try in a moment, or email us at{" "}
+          <a href={`mailto:${SITE.email}`} className="underline underline-offset-2">
+            {SITE.email}
+          </a>
+          .
+        </p>
+      )}
+      <button
+        type="submit"
+        disabled={status === "sending"}
+        className="min-h-[52px] w-full rounded-full bg-brand px-7 font-bold text-white hover:bg-brand-deep disabled:opacity-60 sm:w-auto sm:self-start"
+      >
+        {status === "sending" ? "Sending your message…" : "Send my message"}
       </button>
     </form>
   );

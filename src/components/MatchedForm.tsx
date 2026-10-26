@@ -4,7 +4,7 @@ import { useSearchParams } from "next/navigation";
 import { LeadForm } from "./LeadForm";
 import { programBySlug } from "@/lib/site";
 
-/** The page form, pre-filled from ?loan=<program slug> (links from program pages and calculators). */
+/** The /get-funding form. Program pages and calculators link with ?loan=<program slug>, which presets the deal type. */
 export function MatchedForm() {
   const slug = useSearchParams().get("loan") ?? "";
   const preset = programBySlug(slug)?.preset;

@@ -1,163 +1,322 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import type { ReactNode } from "react";
 import { PageIntro } from "@/components/PageIntro";
-import { Prose } from "@/components/Prose";
-import { FaqSection } from "@/components/sections";
+import { FaqSection, Sources } from "@/components/sections";
+import { ButtonLink, Container, Eyebrow, H2 } from "@/components/ui";
 import { SITE } from "@/lib/site";
 
 export const metadata: Metadata = {
-  title: { absolute: "About Fund Your Deal: Fast Loans for Real Estate Investors" },
+  title: { absolute: "About Fund Your Deal: Deal-First Investor Loans" },
   description:
-    "About Fund Your Deal: fast business-purpose loans for investors on rentals, flips, bridge deals, new builds and portfolios. Investment property only.",
+    "Fund Your Deal gets investors’ deals funded: flips, hard money, bridge, BRRRR, new builds, and rental loans to refinance out. Investment property only.",
   alternates: { canonical: "/about" },
 };
 
+// The moments this site is built for, and the loan that fits each one.
+const SITUATIONS: { moment: string; text: ReactNode }[] = [
+  {
+    moment: "Under contract, closing date set",
+    text: (
+      <>
+        A <Link href="/fix-and-flip-loans">fix and flip loan</Link> or a <Link href="/hard-money-loans">hard money loan</Link> covers the purchase and the renovation in one
+        short-term loan, sized on what the house will be worth after the work.
+      </>
+    ),
+  },
+  {
+    moment: "Buying before the long-term loan is lined up",
+    text: (
+      <>
+        A <Link href="/bridge-loans">bridge loan</Link> lets you close now and sell or refinance later. Lenders size it on the property and on a believable exit.
+      </>
+    ),
+  },
+  {
+    moment: "Renovating a house you plan to keep",
+    text: (
+      <>
+        <Link href="/brrrr-loans">BRRRR financing</Link> pays for the purchase and the rehab first, then a rental loan replaces it once the house is rented.
+      </>
+    ),
+  },
+  {
+    moment: "A lot, a set of plans and a builder",
+    text: (
+      <>
+        A <Link href="/ground-up-construction-loans">ground-up construction loan</Link> releases the build budget in <Link href="/glossary#draws">draws</Link> as each stage
+        passes inspection.
+      </>
+    ),
+  },
+  {
+    moment: "Rehab finished, tenant moving in",
+    text: (
+      <>
+        Refinance out into a rental loan that qualifies on DSCR (<Link href="/glossary#dscr">debt service coverage ratio</Link>): the property’s monthly rent divided by its
+        total monthly payment. <Link href="/dscr-loans">DSCR loans</Link> look at the house, not your pay stubs, and a{" "}
+        <Link href="/investment-property-cash-out-refinance">cash-out refinance</Link> can pull your cash back out.
+      </>
+    ),
+  },
+  {
+    moment: "Keeping it as a rental, or several of them",
+    text: (
+      <>
+        <Link href="/short-term-rental-loans">Short-term rental loans</Link> for nightly-stay homes, and <Link href="/rental-portfolio-loans">portfolio loans</Link> that put a
+        group of rentals under one loan.
+      </>
+    ),
+  },
+];
+
+const PRINCIPLES: { title: string; text: ReactNode }[] = [
+  {
+    title: "The property comes before the paperwork.",
+    text: (
+      <>
+        Investor loans are sized on the asset: the price, the rehab budget, the <Link href="/glossary#arv">after-repair value</Link>, the rent and the exit. So those are the first
+        questions we ask, and applying takes about 60 seconds, mostly taps, with no tax returns to upload.
+      </>
+    ),
+  },
+  {
+    title: "Every deal has one number that decides it.",
+    text: (
+      <>
+        On a flip it’s usually the after-repair value. On a rental it’s the rent against the payment. On a contract it’s the closing date. Finding that number early tells you
+        whether the deal works before you spend money on inspections and appraisals.
+      </>
+    ),
+  },
+  {
+    title: "A figure without a date is a guess.",
+    text: (
+      <>
+        Rates and limits on this site are ranges that lenders published, with the month they were pulled and the source listed under each page. They show where the market sits.
+        Your own numbers arrive in writing, after the call. The <Link href="/rates">rates page</Link> keeps the current ranges.
+      </>
+    ),
+  },
+  {
+    title: "Costs go on paper before you commit.",
+    text: (
+      <>
+        Rate, <Link href="/glossary#points">points</Link>, lender fees and any prepayment terms come with your written terms, so the settlement statement holds no surprises.
+      </>
+    ),
+  },
+  {
+    title: "A fast no beats a slow maybe.",
+    text: (
+      <>
+        If a deal doesn’t fit a business-purpose loan, you should hear that on the first call, not after a week of uploads. That leaves you time to find other money while the
+        contract is still alive.
+      </>
+    ),
+  },
+];
+
+const WONT: { title: string; text: ReactNode }[] = [
+  {
+    title: "Fund a property you or a relative will occupy",
+    text: (
+      <>
+        Living upstairs in a duplex and renting out the downstairs counts too, as does a vacation place you’ll use yourself. Those loans belong with a residential mortgage
+        lender, under the consumer rules that come with them.
+      </>
+    ),
+  },
+  { title: "Make personal or consumer loans", text: <>Every loan is for a business purpose: buying, fixing, building or holding investment property.</> },
+  {
+    title: "Promise approval, a rate or a closing date up front",
+    text: <>Each loan goes through the licensed lender’s underwriting. Published ranges and lender timelines are a guide, not a quote.</>,
+  },
+  { title: "Pull your credit so you can apply", text: <>The form asks for a rough range. You’re told before any credit check happens later in the process.</> },
+  {
+    title: "Act as your CPA or attorney",
+    text: <>Happy to walk through how an LLC, a seasoning rule or a 1031 deadline changes the loan. The entity and tax decisions are for your own advisers.</>,
+  },
+];
+
 const FAQ = [
   {
-    q: "Is Fund Your Deal a lender?",
-    a: "Fund Your Deal is an associate of a licensed lender. You work with Fund Your Deal from the first call through closing, and every loan is subject to the licensed lender’s underwriting and approval; your loan documents name the lender of record. Fund Your Deal makes business-purpose loans on investment property only, never owner-occupied or consumer loans.",
+    q: "Who makes the loan when I work with Fund Your Deal?",
+    a: "Fund Your Deal is an associate of a licensed lender. Fund Your Deal is your point of contact from the first call to the closing, and the licensed lender underwrites the loan and makes the credit decision. Your loan documents name the lender of record. Every loan is subject to that underwriting and approval.",
   },
   {
-    q: "What kinds of investors does Fund Your Deal work with?",
-    a: "Anyone financing investment property for a business purpose, from a first rental or first flip to a portfolio of rentals held in an LLC. Rental loans usually don’t require experience. Project loans such as flips and new builds are priced and sized partly on your track record, and first-time investors often get lower leverage.",
+    q: "What does deal-first mean in practice?",
+    a: "It means the conversation starts with the property and its deadline, not with your income. The first questions cover the price, the rehab, the after-repair value or the rent, and the closing date. Investor loans are sized on those numbers, so knowing them early tells you whether the deal can be funded on time.",
   },
   {
-    q: "Does Fund Your Deal finance a home I’ll live in?",
-    a: "No. Every loan is for investment property that neither you nor a family member will live in, and that includes living in one unit of a 2–4 unit building while renting the others. If you’ll live in the property, a residential mortgage lender is the right place to start.",
+    q: "Do I need experience to work with Fund Your Deal?",
+    a: "Not always. Several flip lenders, including Roc Capital, Civic and New Silver, published no minimum experience in October 2026, though track record changes leverage and rate. Rental loans usually require none. New construction is stricter: lenders such as LendingOne, Roc, Civic and Lima One usually look for one finished ground-up build within roughly three years.",
   },
   {
-    q: "Where do the rates and terms on this site come from?",
-    a: "From lenders’ own published program pages and public loan data such as the federal HMDA files, each with the date it was pulled and the sources listed at the bottom of the page. They describe the market, not an offer. What you’re offered depends on the property, your credit and your track record, and it comes in writing after the call.",
+    q: "Can Fund Your Deal finance a house I’m going to live in?",
+    a: "No. Fund Your Deal only funds property held as an investment, where no one in your household or family will be living. A house you’ll occupy, a unit you’ll live in while renting out the others, and a second home you’ll use are all off the table. For any of those, start with a residential mortgage lender.",
   },
+  {
+    q: "Why does the site lead with flips, bridge and construction loans?",
+    a: "Because those are the loans with a clock on them: a contract closing, an auction deadline, a contractor waiting on a draw. Rental loans still matter here, as the way out of a project. Once the work is done, a rental loan lets you refinance out, keep the property and often pull cash back out.",
+  },
+  {
+    q: "Are the rates and terms on this site an offer?",
+    a: "No. They are ranges lenders published on their own program pages, each with the date pulled and the source listed. They show the market, not your deal. Your rate, leverage and fees turn on the house, your credit score and the deals you’ve done before, and they reach you in writing after you talk to a loan specialist.",
+  },
+];
+
+const SOURCES = [
+  { label: "eCFR — 12 CFR 1026.3, exempt transactions (business purpose)", url: "https://www.ecfr.gov/current/title-12/part-1026/section-1026.3" },
+  { label: "eCFR — Regulation Z official interpretations: rental property as business purpose (comment 3(a)-4)", url: "https://www.ecfr.gov/current/title-12/part-1026/appendix-Supplement%20I%20to%20Part%201026" },
+  { label: "Roc Capital — Fix and flip", url: "https://roccapital.com/fix-and-flip" },
+  { label: "Civic Financial Services — Fix and flip", url: "https://civicfs.com/fix-and-flip/" },
+  { label: "New Silver — Fix and flip loans", url: "https://newsilver.com/fix-and-flip-loans/" },
+  { label: "RCN Capital — Loan programs (experience tiers)", url: "https://www.rcncapital.com/loan-programs" },
+  { label: "Lima One Capital — Rental loans", url: "https://www.limaone.com/rental/" },
+  { label: "Defy Mortgage — DSCR loans", url: "https://defymortgage.com/non-qm-loans/dscr-loans/" },
+  { label: "Lima One Capital — New construction loans", url: "https://www.limaone.com/new-construction-loans/" },
+  { label: "LendingOne — New construction loans", url: "https://lendingone.com/loan-types/new-construction-loans/" },
+  { label: "Roc Capital — Ground-up construction", url: "https://roccapital.com/ground-up" },
+  { label: "Civic Financial Services — Ground-up construction", url: "https://civicfs.com/ground-up-construction-loan/" },
 ];
 
 export default function Page() {
   return (
     <>
-      <PageIntro crumbs={[{ href: "/", label: "Home" }, { label: "About" }]} eyebrow="About Fund Your Deal" title="Fast funding for real estate investors.">
+      <PageIntro crumbs={[{ href: "/", label: "Home" }, { label: "About" }]} eyebrow="About us" title="For investors with a deal on the clock.">
         <p>
-          {SITE.name} provides fast business-purpose loans to real estate investors on rentals, flips, bridge deals, new builds and portfolios, with a 60-second application and a
-          fast close. Investment property only.
+          {SITE.name} gets business-purpose loans funded for real estate investors who already have a property in play: under contract, half-renovated, ready to build or
+          ready to refinance out. {SITE.name} is an associate of a licensed lender. Investment property only.
         </p>
       </PageIntro>
-      <Prose>
-        <h2>What Fund Your Deal does</h2>
-        <p>
-          We lend on property you own as an investment: homes you rent out, homes you renovate and sell, properties you need to buy before long-term financing is in place, and homes
-          you build from the ground up. You deal with one company from the first call to the closing table: a loan specialist who knows investor lending, your terms in writing, and
-          a closing timeline you can plan a contract around.
-        </p>
-        <p>
-          Good deals don’t wait. Sellers want proof of funds, auctions want certainty, and a rehab that sits waiting on financing costs you interest, taxes and insurance every week.
-          Most investor financing still starts with a long application and slow answers. {SITE.name} is built to move at the speed of the deal instead.
-        </p>
 
-        <h2>What we fund</h2>
-        <ul>
-          <li>
-            <Link href="/dscr-loans">DSCR rental loans</Link> and <Link href="/short-term-rental-loans">short-term rental loans</Link>, which qualify on the property’s{" "}
-            <Link href="/glossary#dscr">debt service coverage ratio (DSCR)</Link>: its monthly rent divided by its monthly payment of principal, interest, taxes, insurance and
-            association dues (PITIA)
-          </li>
-          <li>
-            <Link href="/fix-and-flip-loans">Fix and flip</Link>, <Link href="/hard-money-loans">hard money</Link>, <Link href="/bridge-loans">bridge</Link> and{" "}
-            <Link href="/brrrr-loans">BRRRR</Link> financing for value-add deals, with rehab funds paid out in draws
-          </li>
-          <li>
-            <Link href="/ground-up-construction-loans">Ground-up construction</Link> for spec homes and build-to-rent projects
-          </li>
-          <li>
-            <Link href="/rental-portfolio-loans">Portfolio loans</Link> that put several rentals under one loan, and{" "}
-            <Link href="/investment-property-cash-out-refinance">cash-out refinances</Link> that turn a rental’s equity into the next down payment
-          </li>
-        </ul>
-        <p>
-          Not sure which fits? <Link href="/loans">See every program side by side</Link>, sorted by what you plan to do with the property.
-        </p>
+      <section className="border-t border-line">
+        <Container className="flex flex-col gap-10 py-[72px]">
+          <div className="flex max-w-[700px] flex-col gap-3">
+            <Eyebrow>Who it’s for</Eyebrow>
+            <H2>You found the deal. Now the money has to keep up.</H2>
+            <p className="text-[17px] leading-relaxed text-ink-2">
+              This site is built for six moments. Each one points to a different kind of loan, and each loan moves on its own timeline.
+            </p>
+          </div>
+          <ul className="grid gap-px overflow-hidden rounded-2xl border border-line bg-line [grid-template-columns:repeat(auto-fit,minmax(min(100%,320px),1fr))]">
+            {SITUATIONS.map((s) => (
+              <li key={s.moment} className="flex flex-col gap-2 bg-white p-6">
+                <span className="text-[18px] font-semibold tracking-[-0.01em]">{s.moment}</span>
+                <p className="text-[15px] leading-relaxed text-ink-2 [&_a]:text-brand [&_a]:underline [&_a]:underline-offset-2">{s.text}</p>
+              </li>
+            ))}
+          </ul>
+          <p className="text-[15px] text-ink-2">
+            Not sure which one you’re in?{" "}
+            <Link href="/loans" className="font-semibold text-brand underline underline-offset-2">
+              Line up every program by what you plan to do with the property
+            </Link>
+            .
+          </p>
+        </Container>
+      </section>
 
-        <h2>Who we work with</h2>
-        <ul>
-          <li>
-            <strong>First-time investors</strong> buying a first rental or a first flip. Most rental lenders don’t require landlord experience; flip lenders often lend to
-            first-timers at lower leverage.
-          </li>
-          <li>
-            <strong>Self-employed investors</strong> whose write-offs make their tax returns look thinner than their business. A rental loan that qualifies on the property never
-            asks for the return.
-          </li>
-          <li>
-            <strong>Flippers and BRRRR investors</strong> who need the purchase and the rehab in one loan, and a refinance plan for the properties they keep.
-          </li>
-          <li>
-            <strong>Builders</strong> financing a spec home or a build-to-rent project in stages as the work is inspected.
-          </li>
-          <li>
-            <strong>Growing portfolio owners</strong> who hold rentals in an LLC, want one loan across several properties, or want to pull equity out to buy again.
-          </li>
-        </ul>
+      <section className="border-t border-line bg-white">
+        <Container className="grid items-start gap-12 py-[72px] lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
+          <div className="flex flex-col gap-4 text-[17px] leading-relaxed text-ink-2">
+            <Eyebrow>The lender behind the loan</Eyebrow>
+            <H2>One company on your side of the table.</H2>
+            <p>
+              {SITE.name} is an associate of a licensed lender. In practice, that means you have one point of contact at {SITE.name} for the whole deal: the first call, your
+              written terms, the list of documents and the push to close on time.
+            </p>
+            <p>
+              The licensed lender underwrites the loan and makes the credit decision. Its name appears on your loan documents as the lender of record, and every loan is subject to
+              its underwriting and approval.
+            </p>
+          </div>
+          <dl className="flex flex-col gap-5 rounded-2xl border border-line bg-paper p-7 text-[15px] leading-relaxed">
+            <div>
+              <dt className="font-mono text-xs uppercase tracking-[0.08em] text-muted">{SITE.name} handles</dt>
+              <dd className="mt-1.5 text-ink-2">The first call, your terms in writing, the document list and keeping the closing timeline on track.</dd>
+            </div>
+            <div className="border-t border-line pt-5">
+              <dt className="font-mono text-xs uppercase tracking-[0.08em] text-muted">The licensed lender handles</dt>
+              <dd className="mt-1.5 text-ink-2">Underwriting, the credit decision and the loan itself, as the lender of record named on your documents.</dd>
+            </div>
+          </dl>
+        </Container>
+      </section>
 
-        <h2>How we work with our licensed lending partner</h2>
-        <p>
-          {SITE.name} is an associate of a licensed lender. You work with {SITE.name} throughout: the first call, your terms, the document list and the closing timeline. Credit
-          decisions are made under the licensed lender’s underwriting standards, every loan is subject to underwriting and approval, and your loan documents identify the lender of
-          record.
-        </p>
-        <p>
-          What that means for you is one point of contact and one set of terms, so you aren’t passed around while the deal clock runs.
-        </p>
+      <section className="border-t border-line">
+        <Container className="flex flex-col gap-10 py-[72px]">
+          <div className="flex max-w-[700px] flex-col gap-3">
+            <Eyebrow>Deal-first principles</Eyebrow>
+            <H2>Five rules we work by.</H2>
+          </div>
+          <ol className="flex flex-col">
+            {PRINCIPLES.map((p, i) => (
+              <li key={p.title} className="grid gap-2 border-t border-line py-6 last:border-b sm:grid-cols-[64px_minmax(0,1fr)_minmax(0,1.6fr)] sm:gap-6">
+                <span className="font-mono text-[15px] text-brand">{String(i + 1).padStart(2, "0")}</span>
+                <span className="text-[19px] font-semibold leading-snug">{p.title}</span>
+                <p className="text-[15px] leading-relaxed text-ink-2 [&_a]:text-brand [&_a]:underline [&_a]:underline-offset-2">{p.text}</p>
+              </li>
+            ))}
+          </ol>
+        </Container>
+      </section>
 
-        <h2>Investment property only</h2>
-        <p>
-          Every loan we make is a business-purpose loan on non-owner-occupied property: a property that neither you nor a family member will live in. That rules out living in one
-          unit of a duplex or fourplex and renting the rest, and a vacation home you’ll use yourself. Federal Truth in Lending commentary draws the line at 14 days: plan to stay in the property longer than
-          that in the coming year and it counts as owner-occupied (see <Link href="/glossary#non-owner-occupied">business-purpose loans</Link> in the glossary).
-        </p>
-        <p>
-          If the property will be your home, you need a residential mortgage, which comes with its own consumer protections and rules. A residential mortgage lender is the right
-          place to start, and we’ll say so rather than force a fit.
-        </p>
+      <section className="border-t border-line bg-white">
+        <Container className="grid items-start gap-12 py-[72px] lg:grid-cols-[minmax(0,2fr)_minmax(0,3fr)]">
+          <div className="flex flex-col gap-4 text-[17px] leading-relaxed text-ink-2">
+            <Eyebrow>Limits</Eyebrow>
+            <H2>What we won’t do.</H2>
+            <p>
+              The occupancy line comes from federal Truth in Lending commentary. Credit to buy, improve or maintain rental property that isn’t owner-occupied is treated as business
+              purpose. But if the owner plans to spend over 14 days there during the next year, the property stops counting as non-owner-occupied.
+            </p>
+          </div>
+          <ul className="flex flex-col">
+            {WONT.map((w) => (
+              <li key={w.title} className="border-t border-line py-5 last:border-b">
+                <div className="text-[17px] font-semibold">{w.title}</div>
+                <p className="mt-1 text-[15px] leading-relaxed text-ink-2">{w.text}</p>
+              </li>
+            ))}
+          </ul>
+        </Container>
+      </section>
 
-        <h2>What we won’t do</h2>
-        <ul>
-          <li>Lend on a home you or your family will live in, or make consumer and personal loans.</li>
-          <li>Promise approval or a rate before we know the deal. Every loan is subject to underwriting, and the rates on this site are dated market ranges, not quotes.</li>
-          <li>Pull your credit to apply. The form asks for a rough range, and we tell you before any credit check later on.</li>
-          <li>
-            Give tax or legal advice. We’ll explain how an LLC, seasoning or a 1031 exchange deadline affects the loan; entity and tax decisions belong with your CPA or attorney.
-          </li>
-          <li>Leave costs for the closing table. Points, fees and the prepayment structure come in writing with your terms.</li>
-        </ul>
+      <section className="border-t border-line">
+        <Container className="flex flex-col gap-4 py-[72px] text-[17px] leading-relaxed text-ink-2 [&_a]:text-brand [&_a]:underline [&_a]:underline-offset-2">
+          <Eyebrow>Before you call</Eyebrow>
+          <H2 className="max-w-[700px]">Run the deal yourself first.</H2>
+          <p className="max-w-[760px]">
+            The math lenders use is on this site, free: the <Link href="/calculators/fix-and-flip">fix and flip calculator</Link> for profit and cash to close, the{" "}
+            <Link href="/calculators/brrrr">BRRRR calculator</Link> for what comes back at the refinance, and the <Link href="/calculators/dscr">DSCR calculator</Link> and{" "}
+            <Link href="/calculators/rental-cash-flow">rental cash flow calculator</Link> for the hold. If a term on your sheet is new to you, the{" "}
+            <Link href="/glossary">glossary</Link> defines it, and <Link href="/guides/closing-an-investor-loan-fast">our guide to closing fast</Link> covers what sets the
+            timeline.
+          </p>
+          <p className="max-w-[760px]">
+            Want the step-by-step version? Read <Link href="/how-it-works">how it works</Link>, check the <Link href="/disclosures">disclosures</Link>, or{" "}
+            <Link href="/contact">send us a message</Link>.
+          </p>
+        </Container>
+      </section>
 
-        <h2>The principles we lend by</h2>
-        <h3>Speed is part of the product</h3>
-        <p>
-          A seller’s deadline, an auction date or a contractor waiting on a draw doesn’t move for paperwork. The application takes about 60 seconds, the call back is fast, and the
-          document list arrives with your terms so nothing waits on a second request.
-        </p>
-        <h3>The deal comes first</h3>
-        <p>
-          Investor loans are underwritten on the property: its rent, its value, the rehab budget and the exit. That’s what we ask about, and it’s why a strong rental can carry a
-          borrower whose tax return doesn’t.
-        </p>
-        <h3>Numbers with dates and sources</h3>
-        <p>
-          Rate ranges and program terms on this site come from lenders’ published program pages and public loan data, with the date pulled and the sources listed on each page.
-          The <Link href="/rates">rates page</Link> is updated monthly.
-        </p>
-        <h3>Plain English, and tools you can check us with</h3>
-        <p>
-          Every term on a term sheet is defined in the <Link href="/glossary">investor loan glossary</Link>, and the same math lenders use is in our calculators: the{" "}
-          <Link href="/calculators/dscr">DSCR calculator</Link>, <Link href="/calculators/fix-and-flip">fix and flip calculator</Link>,{" "}
-          <Link href="/calculators/brrrr">BRRRR calculator</Link> and <Link href="/calculators/rental-cash-flow">rental cash flow calculator</Link>. Run your deal before you call.
-        </p>
+      <FaqSection heading="Questions about Fund Your Deal" items={FAQ} />
 
-        <h2>Contact</h2>
-        <p>
-          Email <a href={`mailto:${SITE.email}`}>{SITE.email}</a>, read <Link href="/how-it-works">how it works</Link> and our <Link href="/disclosures">disclosures</Link>, or{" "}
-          <Link href="/get-funding">get funding</Link> in about 60 seconds.
-        </p>
-      </Prose>
-      <FaqSection heading="About Fund Your Deal: questions" items={FAQ} />
+      <Container className="pb-[72px]">
+        <div className="flex flex-wrap items-center justify-between gap-7 rounded-3xl bg-ink p-[clamp(32px,5vw,64px)] text-white">
+          <div className="flex max-w-[560px] flex-col gap-3">
+            <h2 className="text-[clamp(28px,3.2vw,40px)] font-semibold leading-[1.1] tracking-[-0.03em]">Got a deal in hand?</h2>
+            <p className="text-[17px] leading-relaxed text-mist">About 60 seconds to apply, no credit pull to apply, and a loan specialist on the phone with you.</p>
+          </div>
+          <ButtonLink href="/get-funding" variant="lime" size="lg">
+            {SITE.cta}
+          </ButtonLink>
+        </div>
+      </Container>
+
+      <Sources sources={SOURCES} updated="2026-10-26" />
     </>
   );
 }

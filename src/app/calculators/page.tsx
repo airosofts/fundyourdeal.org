@@ -4,55 +4,87 @@ import { PageIntro } from "@/components/PageIntro";
 import { CompareTable, FaqSection } from "@/components/sections";
 import { Inline } from "@/components/templates/CalculatorPage";
 import { ButtonLink, Container, Eyebrow, H2, JsonLd } from "@/components/ui";
-import { CALCULATORS, SITE } from "@/lib/site";
+import { SITE } from "@/lib/site";
 
 export const metadata: Metadata = {
-  title: { absolute: "Real Estate Investment Calculators | Fund Your Deal" },
-  description: "Free real estate investment calculators for DSCR, fix and flip profit, BRRRR cash-out and rental cash flow. Lender-style math, no email required.",
+  title: { absolute: "Fix and Flip, BRRRR and DSCR Calculators | Fund Your Deal" },
+  description: "Run the deal before you sign: free fix and flip, BRRRR, DSCR and rental cash flow calculators that size the loan the way lenders do. No email needed.",
   alternates: { canonical: "/calculators" },
 };
 
+const TITLE = "Deal calculators: run the numbers before you sign";
+
 const INTRO =
-  "Four free real estate investment calculators for rental and rehab deals, built on the arithmetic lenders use to size business-purpose loans. No email required. Most start from DSCR, the [debt service coverage ratio](/glossary#dscr): a rental's monthly rent divided by its monthly payment of principal, interest, taxes, insurance and HOA dues (PITIA).";
+  "Four free calculators for the deal in front of you. Start with the [fix and flip](/calculators/fix-and-flip) or [BRRRR](/calculators/brrrr) calculator to size the rehab loan and the cash you bring, then test the refinance or the hold on its [debt service coverage ratio](/glossary#dscr) (DSCR): what a rental collects in a month, divided by what its loan costs that month. No sign-up and no email.";
 
-/** What each calculator answers, keyed by CALCULATORS[].href. */
-const ANSWERS: Record<string, { question: string; bestFor: string }> = {
-  "/calculators/dscr": { question: "Will the rent cover the loan payment?", bestFor: "Buying or refinancing a rental with a DSCR loan." },
-  "/calculators/fix-and-flip": { question: "What will I make when I sell?", bestFor: "Buying, renovating and selling on a short-term rehab loan." },
-  "/calculators/brrrr": { question: "How much cash comes back at the refinance?", bestFor: "Renovating a house to keep, then refinancing into a rental loan." },
-  "/calculators/rental-cash-flow": { question: "What does the rental put in my pocket?", bestFor: "Deciding whether a rental is worth owning after every expense." },
-};
-
-const WHICH = [
-  ["Buy a rental with a DSCR loan", "DSCR", "Does the rent cover the payment, and how big a loan does it support?", "DSCR, cash flow before expenses, largest loan at 1.00 and 1.25"],
-  ["Cash-out refinance a rental you own", "DSCR", "Can the rent carry the new, larger loan?", "Enter the expected appraised value as the price and 25 as the down payment to model a 75% cash-out"],
-  ["Buy a short-term rental", "DSCR", "Does the income the lender counts cover the payment?", "Enter the projected or trailing-12-month income the lender will use as the rent"],
-  ["Judge a rental as an investment", "Rental cash flow", "What's left after vacancy, management, repairs and reserves?", "Cash flow, NOI, cap rate, cash-on-cash and the lender's DSCR"],
-  ["Flip a house", "Fix and flip", "What's the profit, and how much cash do I need?", "Loan size, cash you bring, profit, return on cash and the 70% rule offer"],
-  ["Renovate and keep it", "BRRRR", "How much of my cash comes back at the refinance?", "Cash in, cash back, cash left in, DSCR and cash flow"],
-  ["Not sure whether to sell or keep", "Fix and flip, then BRRRR", "Which exit leaves you better off?", "Run the same purchase and rehab in both; compare the flip profit with cash left in and cash flow"],
+/** Cards, flip and BRRRR first. Hrefs are the calculator routes in docs/brand.md. */
+const CARDS = [
+  {
+    href: "/calculators/fix-and-flip",
+    sym: "Δ",
+    title: "Fix and flip calculator",
+    when: "Before you offer on a flip",
+    question: "Will this flip make money after every cost, and how much cash do I bring?",
+    text: "Sizes the loan on price, rehab and the ARV cap, then adds interest, points, holding and selling costs.",
+  },
+  {
+    href: "/calculators/brrrr",
+    sym: "↻",
+    title: "BRRRR calculator",
+    when: "Before you buy one to keep",
+    question: "How much of my cash comes back when I refinance, and does the rent qualify?",
+    text: "Runs the rehab loan and the DSCR refinance together: cash in, cash back, cash left in.",
+  },
+  {
+    href: "/calculators/dscr",
+    sym: "÷",
+    title: "DSCR calculator",
+    when: "Before the refinance or a rental purchase",
+    question: "Will the rent carry the payment, and how big a loan will it support?",
+    text: "Rent ÷ PITIA the lender's way, plus the largest loan the rent supports at a 1.00 and a 1.25 ratio.",
+  },
+  {
+    href: "/calculators/rental-cash-flow",
+    sym: "$",
+    title: "Rental cash flow calculator",
+    when: "Before you decide to hold",
+    question: "What does the property pay me after every real expense?",
+    text: "Cash flow after vacancy, management, repairs and capex, with NOI, cap rate and cash-on-cash.",
+  },
 ];
 
-const FIT = [
-  "A renovation deal usually passes through three of these. Screen the flip first. If the margin is thin, run the same purchase and rehab through the [BRRRR calculator](/calculators/brrrr) to price the rental exit, then check the refinance in the [DSCR calculator](/calculators/dscr) and the long-term numbers in the [rental cash flow calculator](/calculators/rental-cash-flow).",
-  "The DSCR and rental cash flow calculators look at the same property from two sides. The DSCR calculator is the lender's view: gross rent against PITIA, which is how most 1–4 unit DSCR lenders size a loan. The cash flow calculator is the owner's view: rent after vacancy, management, repairs and capital reserves, minus the loan payment. A property can pass the first and fail the second. On the cash flow calculator's default rental, a lender sees a 1.22 ratio while the owner loses $125 a month.",
-  "The rental calculators use the standard payment formula, P&I = L × r ÷ (1 − (1 + r)^−n), where L is the loan, r the annual rate ÷ 12 and n the number of monthly payments. The fix and flip and BRRRR rehab loans are interest-only, with interest on about half the rehab money on average, because it's paid out in draws as the work is done.",
+const STAGES = [
+  ["Found a flip, before you offer", "Fix and flip", "What's my ceiling price?", "Profit, cash out of pocket, the ARV cap flag and the 70% rule line"],
+  ["Under contract, before the rehab loan", "Fix and flip", "Is the loan big enough, and will it close on time?", "Lender's loan against the cap; months to resale against a 6–24 month term"],
+  ["Planning to keep it after the work", "BRRRR", "How much cash stays in after the refinance?", "Your cash still in after the refinance, DSCR on the new loan, cash flow each month"],
+  ["Mid-rehab and the flip margin is shrinking", "BRRRR, then DSCR", "Is renting and refinancing the better exit?", "What the refinance returns, next to the flip's profit"],
+  ["Rehab or bridge loan coming due", "DSCR", "Will the rent qualify for the payoff loan?", "The ratio against the lender's minimum; the largest loan against the LTV cap"],
+  ["Buying a rental, or pulling cash out of one", "DSCR", "How big a loan will the rent support?", "Largest loan at 1.00 / 1.25; for a cash-out, the appraisal as Price or appraised value and 25 as Cash down"],
+  ["Deciding whether to hold for the long run", "Rental cash flow", "Does it pay me after every expense?", "Cash flow after reserves, cash-on-cash, cap rate"],
 ];
 
-const LEFT_OUT = [
-  "**Lender-specific terms.** Results are estimates, not loan offers. A lender sizes the loan on its own appraisal, rent schedule, credit tiers and fees.",
-  "**Prepayment penalties and reserves.** DSCR loans commonly carry a 5-4-3-2-1 step-down prepayment penalty, and lenders published reserve requirements from none to 9 months of payments or more in October 2026.",
-  "**Income taxes, depreciation and entity questions.** The calculators are pre-tax. Ask a CPA or attorney how a deal and its structure affect you.",
-  "**Appreciation and principal paydown.** Both add to total return; the calculators measure cash.",
-  "**Homes you'll live in.** Every calculator assumes an investment property that neither you nor your family will occupy. A home you'll live in needs a residential mortgage.",
+const ONE_DEAL = [
+  "**1. Screen it as a flip.** The worked flip, a $148,000 purchase with an $82,000 rehab and a $295,000 ARV, clears $24,833 on $44,492 of your cash, and the lender's 70% ARV cap is what sets that cash. [See the flip, line by line](/calculators/fix-and-flip#worked-deal).",
+  "**2. Price the keep.** Feed that purchase and rehab into the [BRRRR calculator](/calculators/brrrr) instead. At 75% of the same $295,000 value, a refinance is $221,250; the calculator shows how much of your cash that returns once the rehab loan, the refinance costs and the months of interest are paid.",
+  "**3. Test the refinance.** The [DSCR calculator](/calculators/dscr) tells you whether the rent carries that loan at the lender's minimum, usually 1.00, and if not, how far the loan shrinks.",
+  "**4. Decide on the hold.** The [cash flow calculator](/calculators/rental-cash-flow) takes out vacancy, management, repairs and capex, the costs a lender's ratio ignores. Its worked triplex reads 1.44 to a lender and $175 a month to its owner.",
+];
+
+const CANT_SEE = [
+  "**Your lender's file.** The real loan comes from the lender's appraisal, the rent it counts, your credit tier and its fees. Treat every result here as an estimate.",
+  "**Prepayment penalties.** The usual DSCR schedule steps down 5-4-3-2-1 over five years; a shorter schedule, a flat penalty or none at all usually costs more in rate.",
+  "**Reserves and flat fees.** Published reserve requirements ran from none to 9 months of payments, and doc, draw and extension fees never show up in a rate.",
+  "**Taxes and entities.** Everything is before income tax. Your CPA or attorney can say how your entity and the deal affect you.",
+  "**Appreciation and paydown.** They add to your total return; the calculators count cash.",
+  "**Owner-occupied homes.** Every calculator assumes a flip or a rental, never a home for you or your family. Moving in? That takes a residential mortgage lender.",
 ];
 
 const FAQS = [
-  { q: "Are these real estate calculators free?", a: "Yes. All four are free and need no sign-up or email; the results update as you type. If you want to talk about funding a deal, the Get Funding form is separate and takes about 60 seconds. A loan specialist then calls you back with terms for that property." },
-  { q: "Which calculator should I use for a short-term rental?", a: "The DSCR calculator. Enter the monthly income a short-term rental lender will count instead of a long-term rent: usually a projection from data such as AirDNA on a purchase, and the last 12 months of bookings on a refinance, after any discount the lender applies. Then run your own expenses in the rental cash flow calculator." },
-  { q: "Can I use the DSCR calculator for a cash-out refinance?", a: "Yes. Put the expected appraised value in the purchase price field, and in the down payment field put the share of value the lender won't lend: 25 for a 75% cash-out, the most common cap lenders published in October 2026. The loan amount shown is your new loan; subtract the payoff and closing costs to estimate your cash out." },
-  { q: "Are the calculator results a loan offer?", a: "No. They're planning estimates built from the numbers you enter and standard lender arithmetic. A lender sizes the actual loan on its own appraisal, rent schedule, credit tiers, fees and rules, and terms move with the market. Use the results to screen deals and decide which ones are worth applying for." },
-  { q: "What's the difference between the DSCR and rental cash flow calculators?", a: "The DSCR calculator shows the lender's view: gross rent divided by principal, interest, taxes, insurance and HOA. The rental cash flow calculator shows the owner's view: rent after vacancy, management, repairs and capital reserves, minus the loan payment, plus cap rate and cash-on-cash. A property can satisfy a lender and still cost you money each month." },
+  { q: "Which calculator should I use for a flip I might keep?", a: "Run both. Start with the fix and flip calculator to see the profit and the cash you bring. Then enter the same purchase and rehab in the BRRRR calculator to see how much cash a refinance would return and whether the rent qualifies. Put the flip's profit next to the rental exit's cash left in and monthly cash flow, and pick the exit." },
+  { q: "Do the calculators cost anything or ask for an email?", a: "No. All four are free, run in your browser and need no sign-up; results update as you type. When you've got a deal that works, the Fund My Deal form is separate and takes about 60 seconds, and a loan specialist calls you back about that property." },
+  { q: "How do I model a cash-out refinance on a rental I own?", a: "Use the DSCR calculator. Put the appraised value you expect in the purchase price box. In the down payment box, enter 100 minus the lender's loan-to-value; most lenders capped cash-out at 75% in October 2026, so that's 25. The loan amount shown is your new loan. Take off the payoff and closing costs to see the cash you'd walk away with." },
+  { q: "Why do the DSCR and rental cash flow calculators disagree?", a: "They measure different things. The DSCR calculator divides gross rent by PITIA, the way most 1–4 unit lenders qualify a loan. The rental cash flow calculator also takes out vacancy, management, repairs and capital reserves before the loan payment. A rental can clear a lender's 1.00 minimum and still pay you very little each month." },
+  { q: "Are the results a loan offer?", a: "No. Each result is an estimate built on your inputs and standard loan math. The real loan depends on the lender's appraisal, the rent it counts, your credit tier and its fees, and published terms change over time. Use the results to decide which deals are worth applying for, then get funding terms on the one in front of you." },
 ];
 
 const PROSE = "text-[17px] leading-[1.7] text-ink-2 [&_a]:text-brand [&_a]:underline [&_a]:underline-offset-2 [&_strong]:text-ink";
@@ -64,58 +96,63 @@ export default function Page() {
         data={{
           "@context": "https://schema.org",
           "@type": "ItemList",
-          name: "Real estate investment calculators",
-          itemListElement: CALCULATORS.map((c, i) => ({ "@type": "ListItem", position: i + 1, name: c.title, url: SITE.url + c.href })),
+          name: "Fund Your Deal calculators",
+          itemListElement: CARDS.map((c, i) => ({ "@type": "ListItem", position: i + 1, name: c.title, url: SITE.url + c.href })),
         }}
       />
-      <PageIntro crumbs={[{ href: "/", label: "Home" }, { label: "Calculators" }]} title="Real estate investment calculators">
+      <PageIntro crumbs={[{ href: "/", label: "Home" }, { label: "Calculators" }]} title={TITLE}>
         <p className="[&_a]:text-brand [&_a]:underline [&_a]:underline-offset-2">
           <Inline text={INTRO} />
         </p>
       </PageIntro>
       <Container className="pb-[88px] pt-4">
-        <div className="grid gap-px overflow-hidden rounded-2xl border border-line bg-line [grid-template-columns:repeat(auto-fit,minmax(min(100%,280px),1fr))]">
-          {CALCULATORS.map((c) => {
-            const a = ANSWERS[c.href];
-            return (
-              <Link key={c.href} href={c.href} className="flex min-h-[200px] flex-col gap-3 bg-white p-7 transition-colors hover:bg-paper">
+        <div className="grid gap-px overflow-hidden rounded-2xl border border-line bg-line [grid-template-columns:repeat(auto-fit,minmax(min(100%,270px),1fr))]">
+          {CARDS.map((c) => (
+            <Link key={c.href} href={c.href} className="group flex min-h-[240px] flex-col gap-3 bg-white p-7 transition-colors hover:bg-paper">
+              <span className="flex items-baseline justify-between gap-3">
                 <span className="font-mono text-[30px] text-brand" aria-hidden="true">
                   {c.sym}
                 </span>
-                <span className="text-[21px] font-semibold tracking-[-0.02em]">{c.title}</span>
-                {a && <span className="text-[16px] font-semibold leading-snug text-ink">{a.question}</span>}
-                <span className="text-[15px] leading-relaxed text-ink-2">{c.text}</span>
-                {a && <span className="font-mono text-xs leading-relaxed text-muted">Best for: {a.bestFor}</span>}
-                <span className="mt-auto pt-2 text-sm font-semibold">Open calculator →</span>
-              </Link>
-            );
-          })}
+                <span className="font-mono text-xs uppercase tracking-[0.06em] text-muted">{c.when}</span>
+              </span>
+              <span className="text-[21px] font-semibold tracking-[-0.02em]">{c.title}</span>
+              <span className="text-[16px] font-semibold leading-snug text-ink">{c.question}</span>
+              <span className="text-[15px] leading-relaxed text-ink-2">{c.text}</span>
+              <span className="mt-auto pt-2 text-sm font-semibold">
+                Run the numbers <span className="inline-block transition-transform group-hover:translate-x-0.5">→</span>
+              </span>
+            </Link>
+          ))}
         </div>
       </Container>
 
       <section id="which-calculator" className="scroll-mt-20 border-t border-line bg-white">
         <Container className="flex flex-col gap-8 py-[88px]">
           <div className="flex max-w-[720px] flex-col gap-3">
-            <Eyebrow>Which one to use</Eyebrow>
-            <H2>Start from your plan for the property.</H2>
-            <p className="text-[17px] leading-relaxed text-ink-2">Each calculator answers one question. Pick the row that matches what you intend to do with the property.</p>
+            <Eyebrow>Which one, when</Eyebrow>
+            <H2>Match the calculator to where the deal is.</H2>
+            <p className="text-[17px] leading-relaxed text-ink-2">Most rehab deals pass through three of the four. Find the row for the stage you&apos;re at.</p>
           </div>
-          <CompareTable columns={["Your plan", "Open the calculator", "The question it answers", "What you'll see"]} rows={WHICH} />
+          <CompareTable columns={["Where the deal is", "Run", "The question", "What to look at"]} rows={STAGES} />
         </Container>
       </section>
 
-      <section id="how-they-fit" className="scroll-mt-20 border-t border-line">
+      <section id="one-deal" className="scroll-mt-20 border-t border-line">
         <Container className="grid items-start gap-12 py-[88px] lg:grid-cols-[minmax(0,1fr)_minmax(0,2fr)]">
           <div className="flex flex-col gap-3.5">
-            <Eyebrow>How they fit together</Eyebrow>
-            <H2>{"One deal, two views: the lender's and yours."}</H2>
+            <Eyebrow>One deal, start to finish</Eyebrow>
+            <H2>How a flip turns into a rental, in four runs.</H2>
+            <p className="text-[17px] leading-relaxed text-ink-2">The lender sees one ratio. You need the profit, the cash and the monthly check. Run them in this order.</p>
           </div>
           <div className={`flex flex-col gap-5 ${PROSE}`}>
-            {FIT.map((t) => (
+            {ONE_DEAL.map((t) => (
               <p key={t}>
                 <Inline text={t} />
               </p>
             ))}
+            <p>
+              <Inline text="Under the hood, rental payments amortize the usual way: each month's principal and interest is loan × r ÷ [1 − (1 + r)^−n], with r as the monthly rate and n as the count of monthly payments in the term. Rehab loans in the flip and BRRRR calculators are interest-only, charged on the purchase advance plus about half the rehab money, since rehab funds go out in [draws](/glossary#draws) as work is finished." />
+            </p>
           </div>
         </Container>
       </section>
@@ -123,11 +160,11 @@ export default function Page() {
       <section id="limits" className="scroll-mt-20 border-t border-line bg-white">
         <Container className="grid items-start gap-12 py-[88px] lg:grid-cols-[minmax(0,1fr)_minmax(0,2fr)]">
           <div className="flex flex-col gap-3.5">
-            <Eyebrow>What they leave out</Eyebrow>
-            <H2>Good for screening deals. Not a loan offer.</H2>
+            <Eyebrow>What they can&apos;t see</Eyebrow>
+            <H2>Screening tools, not a term sheet.</H2>
           </div>
           <ul className={`flex list-disc flex-col gap-3 pl-6 ${PROSE}`}>
-            {LEFT_OUT.map((t) => (
+            {CANT_SEE.map((t) => (
               <li key={t}>
                 <Inline text={t} />
               </li>
@@ -136,11 +173,11 @@ export default function Page() {
         </Container>
       </section>
 
-      <FaqSection heading="Calculator questions" items={FAQS}>
+      <FaqSection heading="Questions about the calculators" items={FAQS}>
         <div className="flex flex-wrap items-center justify-between gap-4 rounded-2xl bg-ink px-6 py-5 text-paper">
-          <span className="text-[16px] leading-snug">Found a deal that works? Apply in about 60 seconds and get funded fast.</span>
+          <span className="text-[16px] leading-snug">Deal pencils out? Get it funded. Applying takes about 60 seconds.</span>
           <ButtonLink href="/get-funding" variant="lime">
-            Get Funding
+            {SITE.cta}
           </ButtonLink>
         </div>
       </FaqSection>

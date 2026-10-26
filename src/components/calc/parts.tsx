@@ -1,8 +1,8 @@
 import Link from "next/link";
 import type { ChangeEvent, ReactNode } from "react";
 
-// Building blocks shared by the calculators: inputs on a white card, results
-// on a dark card, a breakdown table and a call to action.
+// Calculator building blocks: the deal's numbers on a white card, the verdict
+// on a navy card, a line-by-line table and a pill call to action.
 
 export function Group({ legend, children }: { legend: string; children: ReactNode }) {
   return (
@@ -67,13 +67,16 @@ export function InputsCard({ label, children }: { label: string; children: React
   );
 }
 
+/** Verdict badges on the navy result card: green = works, apricot = workable but tight, red = doesn't work.
+ *  Text contrast: ink on #7ad8b2 9.4:1, ink on lime 8.0:1, white on warn 6.7:1. */
+const TONE = { strong: "bg-[#7ad8b2] text-ink", ok: "bg-lime text-ink", low: "bg-warn text-white" } as const;
+
 export function ResultCard({ eyebrow, value, badge, children }: { eyebrow: string; value: string; badge?: { label: string; tone: "strong" | "ok" | "low" }; children?: ReactNode }) {
-  const TONE = { strong: "bg-lime", ok: "bg-[#E8E2A6]", low: "bg-[#E9C2B3]" } as const;
   return (
     <div className="flex flex-col gap-6 rounded-[20px] bg-ink p-6 text-paper sm:p-7" aria-live="polite">
       <div className="flex flex-wrap items-baseline justify-between gap-3">
         <span className="font-mono text-xs tracking-[0.08em] text-mist">{eyebrow}</span>
-        {badge && <span className={`rounded-full px-2.5 py-1.5 text-[13px] font-semibold text-ink ${TONE[badge.tone]}`}>{badge.label}</span>}
+        {badge && <span className={`rounded-full px-2.5 py-1.5 text-[13px] font-semibold ${TONE[badge.tone]}`}>{badge.label}</span>}
       </div>
       <div className="break-words font-mono text-[clamp(52px,7vw,88px)] font-medium leading-[0.95] tracking-[-0.05em] text-white">{value}</div>
       {children}
@@ -120,8 +123,8 @@ export function Breakdown({ title, rows, total }: { title: string; rows: [string
 
 export function CalcCta({ href = "/get-funding", children }: { href?: string; children: ReactNode }) {
   return (
-    <Link href={href} className="flex min-h-16 items-center justify-between gap-4 rounded-2xl bg-brand px-6 text-white hover:bg-brand-deep">
-      <span className="text-[17px] font-semibold">{children}</span>
+    <Link href={href} className="flex min-h-16 items-center justify-between gap-4 rounded-full bg-brand px-7 text-white transition-colors hover:bg-brand-deep">
+      <span className="text-[17px] font-bold tracking-[-0.01em]">{children}</span>
       <span className="font-mono" aria-hidden="true">
         →
       </span>

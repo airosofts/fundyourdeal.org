@@ -25,7 +25,7 @@ portal, but it is **its own brand with its own words**. Where this brief and
 - **No promises:** no "guaranteed approval", "no credit check", "best/lowest rates".
 - **Business purpose only:** for a home the borrower or family will live in, point them to a residential mortgage lender. No tax or legal advice.
 - **Sourced facts only:** every rate, LTV/LTC/ARV limit, score, term, fee or timeline comes from `docs/research/loan-terms-2026-10.md` (or `compliance-2026-10.md`) or a source you fetch and list. Check every worked example's arithmetic.
-- **Define DSCR in plain words at its first mention on every page:** "DSCR (debt service coverage ratio): the property's monthly rent divided by its monthly payment". Link `/glossary#dscr` where links are possible.
+- **Define DSCR in plain words at its first mention on every page,** in your own words. For example: "DSCR (debt service coverage ratio) — what the property rents for each month, divided by its full monthly loan payment". Don't use Gable's phrasing "the property's monthly rent divided by its monthly payment". Link `/glossary#dscr` where links are possible.
 
 ## Must not copy Gable Funding
 Gable's site covers the same products. Duplicate text across the two domains would sink both in search, so:

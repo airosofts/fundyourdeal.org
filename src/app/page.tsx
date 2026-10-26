@@ -1,373 +1,739 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import type { ReactNode } from "react";
 import { Faq } from "@/components/Faq";
 import { LeadForm } from "@/components/LeadForm";
-import { RatesTable } from "@/components/RatesTable";
-import { Bullets, CompareTable, ExampleCard, Formula } from "@/components/sections";
+import { ExampleCard, Formula } from "@/components/sections";
 import { ButtonLink, Check, Container, Eyebrow, H2 } from "@/components/ui";
-import { CALCULATORS, PROGRAMS, SITE } from "@/lib/site";
+import { SITE } from "@/lib/site";
 
-// Every figure is a published lender term from docs/research/loan-terms-2026-10.md
-// (pulled 2026-10-19). Source codes in the comments (K1, L1, D1…) are listed there;
-// LO7 = lendingone.com/insight/how-are-dscr-loan-interest-rates-determined/ (Sep 22, 2026).
+// Fund Your Deal homepage, deal-first. Every market figure is a published lender term from
+// docs/research/loan-terms-2026-10.md (pulled 2026-10-19); the source codes in the comments
+// (K3, L3, RC5, D1, HM…) are listed at the bottom of that file. Worked examples are
+// illustrative deals: their prices, rents, taxes and the costs marked "assumed" are inputs,
+// not market data. The arithmetic for both examples is written out next to each one.
 
 export const metadata: Metadata = {
-  title: { absolute: `Fast Funding for Real Estate Investors | ${SITE.name}` },
+  title: { absolute: `Investor Loans for Flips, Bridge and BRRRR | ${SITE.name}` },
   description:
-    "Fast funding for real estate investors: DSCR rental, fix and flip, bridge, BRRRR, construction and portfolio loans. Apply in 60 seconds, no credit pull.",
+    "Fix and flip, bridge, BRRRR and new-build loans for real estate investors, plus the rental refinance out. See what your deal needs and how fast it closes.",
   alternates: { canonical: "/" },
 };
 
-const TERMS = [
-  { k: "80%", v: "Typical max loan-to-value on a DSCR purchase — 85% for top credit" }, // K1, L1, LO1, E1, RC1, C1; D1, G1, A1
-  { k: "100%", v: "Of rehab costs financed by most fix and flip lenders" }, // K3, L3, R1, LO2, RC3, C3, E2
-  { k: "1.00", v: "The DSCR most rental lenders want — some go to 0.75" }, // L1, R1; LO1, D1
-  { k: "7–14", v: "Business days to close a bridge loan at fast-moving lenders" }, // K4, LO6
+/* ------------------------------------------------------------------ */
+/* Hero                                                                */
+/* ------------------------------------------------------------------ */
+
+const CALL_NUMBERS: [string, string][] = [
+  ["Price", "What you're paying, or the payoff if you already own it."],
+  ["Rehab", "The scope of work and what it costs, line by line if you have it."],
+  ["ARV or rent", "What it sells for after the work, or what it rents for if you keep it."],
+  ["Closing date", "The date on the contract or the auction terms. It sets the pace for everything else."],
 ];
 
-/** One published fact per program card. */
-const PROGRAM_FACTS: Record<string, string> = {
-  dscr: "80% max loan-to-value on a purchase at most lenders; 85% at a few for 720–740+ credit.", // K1, L1, LO1, E1, RC1, C1; D1, G1, A1
-  "short-term-rental": "A purchase can be sized on an AirDNA income projection; a refinance on 12 months of bookings.", // L2, A1, G1, E1; E3, STR
-  "fix-and-flip": "85–100% of the purchase and 100% of the rehab, capped at 70–80% of after-repair value (ARV).", // R1, K3, L3, LO2, RC3/C3, NS, E2; K3, RC3/C3, E2, NS
-  "hard-money": "The 2025 median rate on short-term investor loans was 9.99%, plus 0–2 points.", // HM; NS, E2
-  bridge: "12–24 months at 70–85% of value, often with no prepayment penalty.", // RC5, L5, K4
-  brrrr: "The refinance lends about 75% of ARV, after none to 90 days of seasoning.", // LO5; L1, L3, RC1/C1, K1
-  construction: "82.5–90% of total cost, with 60–75% of the land financed at closing.", // K5, RC4/C4, R1, L4, LO3, NS; RC4/C4, L4
-  portfolio: "Two to five properties minimum, depending on the lender, under one note.", // L1 2+, E1 3+, LO4 3–20, L7 5+
-  "cash-out-refinance": "Most lenders cap cash-out at 75% of appraised value, after about 90 days of ownership.", // L1, LO1, E1, RC1, C1; K1, LO1, L1
+/* ------------------------------------------------------------------ */
+/* What's your deal?                                                    */
+/* ------------------------------------------------------------------ */
+
+type Deal = {
+  key: string;
+  label: string;
+  situation: ReactNode;
+  loan: string;
+  href: string;
+  stat: string;
+  statText: string;
+  cta: string;
+  apply: string;
 };
 
-const PITIA: [string, string, string][] = [
-  ["P", "Principal", "The part of each payment that pays the loan down."],
-  ["I", "Interest", "Set by your rate. On an interest-only loan it's the whole loan payment, which is why interest-only raises the ratio."],
-  ["T", "Taxes", "The yearly property tax bill, divided by 12."],
-  ["I", "Insurance", "The yearly landlord policy, plus flood cover where it's required, divided by 12."],
-  ["A", "Association dues", "Monthly HOA or condo fees, if the property has them."],
+const DEALS: Deal[] = [
+  {
+    key: "flip",
+    label: "Flip",
+    situation: "You're buying a tired house to renovate and resell, and the purchase and the work both need funding.",
+    loan: "Fix and flip loan",
+    href: "/fix-and-flip-loans",
+    stat: "100%",
+    statText: "of the rehab budget financed at most fix and flip lenders, paid out in draws as the work gets done.", // K3, L3, R1, LO2, RC3, C3, E2
+    cta: "Fund my flip",
+    apply: "/get-funding?loan=fix-and-flip",
+  },
+  {
+    key: "bridge",
+    label: "Bridge",
+    situation: "You have to close now and will sell, lease up or refinance later. The house needs little or no work.",
+    loan: "Bridge loan",
+    href: "/bridge-loans",
+    stat: "12–24 mo",
+    statText: "of runway on published bridge terms to reach the sale or the refinance that pays it off.", // RC5 12; L5 13/19; K4 12/18/24
+    cta: "Fund my bridge loan",
+    apply: "/get-funding?loan=bridge",
+  },
+  {
+    key: "brrrr",
+    label: "BRRRR",
+    situation: "You're buying a rental that needs work, fixing it, renting it out and refinancing to get your cash back.",
+    loan: "BRRRR loan",
+    href: "/brrrr-loans",
+    stat: "~75%",
+    statText: "of the after-repair value is what the refinance typically lends. That figure sets how much of your cash comes back out.", // LO5
+    cta: "Get my BRRRR funded",
+    apply: "/get-funding?loan=brrrr",
+  },
+  {
+    key: "build",
+    label: "New build",
+    situation: "You're building from a bare lot: a spec house to sell, or a new rental you plan to hold.",
+    loan: "Ground-up construction loan",
+    href: "/ground-up-construction-loans",
+    stat: "Up to 90%",
+    statText: "of total project cost at several construction lenders, with the build money released in stages.", // L4, LO3, NS 90% LTC
+    cta: "Fund my build",
+    apply: "/get-funding?loan=construction",
+  },
+  {
+    key: "refi",
+    label: "Rental refinance",
+    situation: (
+      <>
+        The work is done and you&apos;d rather keep it. A{" "}
+        <Link href="/glossary#dscr" className="underline underline-offset-2">
+          DSCR (debt service coverage ratio)
+        </Link>{" "}
+        loan qualifies on one number: what the house rents for each month, divided by its monthly payment. Your income stays out of it.
+      </>
+    ),
+    loan: "Rental cash-out refinance",
+    href: "/investment-property-cash-out-refinance",
+    stat: "75%",
+    statText: "of appraised value: the cash-out ceiling rental lenders publish most often.", // L1, LO1, E1, RC1, C1 75%
+    cta: "Get rental funding",
+    apply: "/get-funding?loan=cash-out-refinance",
+  },
 ];
 
-// $250,000 purchase, 20% down: $200,000 at 7.375% (2025 HMDA median 30-year investor rate, HM)
-// over 360 months. P&I = 200,000 × 0.0061458 / (1 − 1.0061458^−360) = $1,381.35.
-// PITIA = 1,381 + 250 + 125 = $1,756; DSCR = 2,200 ÷ 1,756 = 1.253.
-const DSCR_EXAMPLE = {
-  title: "WORKED EXAMPLE · $250,000 SINGLE-FAMILY RENTAL",
+/* ------------------------------------------------------------------ */
+/* What each loan needs                                                 */
+/* ------------------------------------------------------------------ */
+
+type Needs = { title: string; href: string; rows: [string, string][] };
+
+const NEEDS: Needs[] = [
+  {
+    title: "Fix and flip and hard money",
+    href: "/fix-and-flip-loans",
+    rows: [
+      // E2 600; R1, NS 650; L3 660
+      ["Credit", "Published minimums of 600–660, the lowest floors of any loan on this page."],
+      // RC3, C3, NS none; L3 1 exit in 36 months; R1 tiers
+      ["Experience", "Often not required. Tiered lenders raise leverage as completed flips pile up, and one asks for a finished exit in the past 36 months."],
+      // R1 85–100%, K3 100%, L3 95%, LO2 92.5%, RC3/C3, NS, E2 90%; 100% rehab; ARV caps K3 80%, RC3/C3, E2, NS 75%, R1 60–75%
+      ["Leverage", "85–100% of the price and every dollar of the rehab, as long as the total stays under 70–80% of the after-repair value (ARV). Newer investors and heavy rehabs can see 60–70%."],
+      // NS 1–1.75%; E2 0–2 points + $1,995 doc fee
+      ["Cash to close", "About 10% of the price at 90% leverage, 0–2 points, a lender document fee ($1,995 at one), title and insurance. Then interest-only payments until you sell."],
+    ],
+  },
+  {
+    title: "Bridge",
+    href: "/bridge-loans",
+    rows: [
+      // RC5 660; L5 700
+      ["Credit", "660–700 at the bridge lenders that publish a minimum."],
+      // RC5 exit DSCR 1.10 or sale
+      ["Experience", "Expect more questions about your exit than your history. One lender wants a refinance exit to show a DSCR of at least 1.10."],
+      // RC5 70% LTV / 85% LTC; L5 85%
+      ["Leverage", "70–85% of current value, or up to 85% of cost at one lender."],
+      // L5, K4 no prepayment penalty
+      ["Cash to close", "The 15–30% of value the loan doesn't cover, plus closing costs. At least two programs charge no prepayment penalty, so an early payoff costs nothing extra."],
+    ],
+  },
+  {
+    title: "BRRRR",
+    href: "/brrrr-loans",
+    rows: [
+      // flip 600–660 (E2, R1, NS, L3); DSCR 620–680 (G1 … A1)
+      ["Credit", "The flip range (600–660) for the rehab loan, then the rental range (620–680) for the refinance."],
+      // L1, RC1, C1, D1 none for rental loans
+      ["Experience", "Weighed like a flip on the rehab loan. The rental refinance usually asks for none."],
+      // LO5 up to 95% LTC + 100% rehab; ~75% of ARV refi
+      ["Leverage", "Up to 95% of the purchase plus 100% of the rehab on the first loan; about 75% of ARV on the refinance."],
+      // 100% − 95% (LO5) = 5% of the price
+      ["Cash to close", "Around 5% of the price at 95% leverage, plus points, fees and carry. A strong appraisal at the refinance can hand much of it back."],
+    ],
+  },
+  {
+    title: "Ground-up construction",
+    href: "/ground-up-construction-loans",
+    rows: [
+      // R1 650
+      ["Credit", "650 at the one lender that publishes a floor."],
+      // LO3; RC4/C4; L4
+      ["Experience", "Most want proof you've finished a ground-up build of your own within about three years."],
+      // K5, RC4/C4 85% (90% experienced), R1 82.5–90%, L4, LO3, NS 90%; L4, RC4/C4 100% hard costs; RC4/C4 75% land (60% unpermitted), L4 60%; ARV K5, LO3, RC4/C4 70%, L4 75%, R1 65–75%
+      ["Leverage", "82.5–90% of total cost and 100% of hard costs, with 60–75% of the lot advanced at closing and a cap of 65–75% of completed value."],
+      // NS, LO3 1–2 points; RC4/C4 1-month interest reserve
+      ["Cash to close", "Your 10–17.5% share of cost, front-loaded because the lot is only partly financed. Add 1–2 points; two lenders also hold back a month of interest."],
+    ],
+  },
+  {
+    title: "Rental loan (DSCR), purchase or refinance",
+    href: "/dscr-loans",
+    rows: [
+      // G1 620; E1, D1 640; L1, R1, RC1, C1 660; A1 680
+      ["Credit", "620–680, with most published minimums at 640–660."],
+      // L1, RC1, C1, D1 none; E1 first-time OK
+      ["Experience", "Usually none, and at least one lender says first-time investors are fine."],
+      // K1, L1, LO1, E1, RC1, C1 80%; D1, G1 85% at 740+, A1 720+; cash-out L1, LO1, E1, RC1, C1 75%, G1, D1 80%
+      ["Leverage", "Purchases: up to 80% of value, rising to 85% for 720–740+ scores at a handful of lenders. Cash-outs: 70–80%, most often 75%."],
+      // K1 none; D1 3 months; E1 3–9 months
+      ["Cash to close", "20% down on a purchase, 15% at the top credit tier, plus closing costs and anywhere from zero to 9 months of payments held in reserve."],
+    ],
+  },
+];
+
+/* ------------------------------------------------------------------ */
+/* Worked flip                                                          */
+/* ------------------------------------------------------------------ */
+
+// The deal: buy $164,000, rehab $61,000, ARV $292,000, five months closing to sale.
+// Lender terms: 90% of price (RC3/C3, NS, E2), 100% of rehab, 75% ARV cap (RC3/C3, E2, NS),
+// 9.99% interest-only (assumed; about the 2025 HMDA short-term median of 10%, HM), 2 points + $1,995 doc fee (E2).
+//   Loan: 0.90 × 164,000 = 147,600; + 61,000 = 208,600. Cap: 0.75 × 292,000 = 219,000 (room 10,400).
+//   Cap binds below 208,600 ÷ 0.75 = $278,133.
+//   Cash at closing: 16,400 down + 4,172 points (2% × 208,600) + 1,995 + 3,800 title (assumed) = 26,367.
+//   Interest: 208,600 × 0.0999 ÷ 12 = 1,736.60/mo × 5 = 8,683 (charged on the full loan: conservative).
+//   Holding: 450 × 5 = 2,250 (assumed). Cash in: 26,367 + 8,683 + 2,250 = 37,300.
+//   Sale: 292,000 − 17,520 (6% assumed) − 208,600 payoff = 65,880. Profit: 65,880 − 37,300 = 28,580.
+//   Return on cash: 28,580 ÷ 37,300 = 76.6%. Profit ÷ sale: 9.8%.
+//   Break-even sale: (263,420 − 17,520) ÷ 0.94 = 261,596 (10.4% under 292,000).
+//   Appraisal at 270,000: cap 202,500, loan cut 6,100; points fall 122, so cash at closing +5,978.
+const FLIP_EXAMPLE = {
+  title: "WORKED FLIP · $164,000 RANCH, SOLD IN 5 MONTHS",
   rows: [
-    ["Monthly rent", "$2,200"],
-    ["Principal & interest", "$1,381"],
-    ["Property taxes", "$250"],
-    ["Insurance", "$125"],
-    ["HOA", "$0"],
-    ["PITIA", "$1,756"],
+    ["Purchase price", "$164,000"],
+    ["Rehab budget", "$61,000"],
+    ["Loan: 90% of price + all of the rehab", "$208,600"],
+    ["ARV cap: 75% of $292,000", "$219,000"],
+    ["Cash at closing", "$26,367"],
+    ["Interest and holding, 5 months", "$10,933"],
+    ["Your total cash in the deal", "$37,300"],
   ] as [string, string][],
-  result: { label: "DSCR = $2,200 ÷ $1,756", value: "1.25" },
-  note: "20% down, $200,000 loan at 7.375% over 30 years — the 2025 median rate on 30-year investor loans. Illustrative only, not a rate quote.",
-  dscr: 1.25,
+  result: { label: "Profit on a $292,000 sale", value: "$28,580" },
+  note: "An assumed 9.99% interest-only, about the 10% median on 2025 short-term investor loans, plus 2 points and a $1,995 document fee. Title and closing ($3,800), holding ($450 a month) and selling costs (6%) are assumptions: swap in your own quotes. Illustrative, not a rate quote.",
 };
 
-const DSCR_LEVELS: [string, string][] = [
-  // K1 0.8; LO1, D1 0.75; G1, A1 no-ratio
-  ["Below 1.00", "The rent falls short of the payment and you cover the gap each month. Published programs go as low as 0.75, and a few lend with no ratio at all, usually with more money down."],
-  // L1, R1 1.00 (RC1/C1 1.05)
-  ["1.00", "Break-even. Every dollar of rent goes to the payment, with nothing left for vacancy, repairs or management. It's the most common published minimum."],
-  // L6, C5, WD, MFL 1.20–1.25x; LO7: lower ratios "may subject them to higher rates, fees"
-  ["1.25", "$1.25 of rent for every $1.00 of payment, a 25% cushion. Small multifamily (5+ unit) lenders commonly require 1.20–1.25, and a ratio this strong steers clear of the higher rates and fees that ratios near the minimum can carry."],
+const FLIP_STEPS: [string, string][] = [
+  [
+    "Size it two ways, keep the lower",
+    "90% of $164,000 is $147,600. Add the full $61,000 rehab and the request is $208,600. The ARV cap is 75% of $292,000, or $219,000. The request fits under it with $10,400 to spare, so the loan is the full $208,600.",
+  ],
+  [
+    "Count the cash at the closing table",
+    "The 10% of the price the lender doesn't advance is $16,400. Two points on $208,600 is $4,172, the document fee is $1,995, and title, recording and the first insurance premium come to an assumed $3,800. Total: $26,367.",
+  ],
+  [
+    "Carry it to the sale",
+    "Interest at 9.99% on $208,600 is $1,737 a month, or $8,683 over five months. That's on the high side: rehab money arrives in draws, and you pay interest only on what has been drawn. Taxes, insurance and utilities at $450 a month add $2,250, for $10,933 in all.",
+  ],
+  [
+    "Sell, pay off, keep the rest",
+    "A $292,000 sale less 6% selling costs ($17,520) and the $208,600 payoff returns $65,880. Subtract the $37,300 you put in and the profit is $28,580: about 77% on your cash in five months, or 9.8% of the sale price.",
+  ],
 ];
 
-const DSCR_USES: [string, string][] = [
-  // K1 lower of lease and market rent; RC1/C1 vacant at 90% of market rent
-  ["They choose the rent", "Qualifying rent is whichever is lower: the signed lease or the market rent on the appraiser's rent schedule. A vacant property can still qualify on market rent."],
-  // RC1/C1 1.05; L1, R1 1.00; K1 0.8; LO1, D1 0.75; LO4 1.0, RC2/C2 1.05
-  ["They set a floor", "Single-property minimums published in October 2026 ran from 0.75 to 1.05, with 1.00 the most common. Portfolio lenders asked 1.00–1.05 on the combined rent."],
-  // Max PITIA at 1.25 = 2,200 ÷ 1.25 = 1,760 → P&I 1,385 → $200,528 loan; at 1.00 → P&I 1,825 → $264,234.
-  ["They size the loan", "The ratio caps the payment, and the payment caps the loan. In the example, a 1.25 requirement limits PITIA to $1,760 ($2,200 ÷ 1.25), or about a $200,500 loan at 7.375%. At a 1.00 minimum the rent would carry about $264,000, but the 80% loan-to-value cap still holds the loan at $200,000."],
-  // LO7
-  ["They price it", "A ratio close to the minimum can mean a higher rate or extra fees. Your credit score and your equity in the property move the price too."],
-];
+/* ------------------------------------------------------------------ */
+/* Closing speed                                                        */
+/* ------------------------------------------------------------------ */
 
-const CLOSING: string[][] = [
-  ["Bridge", "7–14 business days", "Valuation and title. Little or no rehab means no budget to review."], // K4, LO6
-  ["Fix and flip and hard money", "About 1–3 weeks; 7 days at the fastest", "The valuation, title and rehab budget review. Repeat borrowers with a complete file close fastest."], // K3 7 days; LO2 7–10 business days; R1 10 business days; L3
-  ["DSCR rental, purchase or refinance", "About 2–5 weeks", "The appraisal and its rent schedule. Published times: 14–21 days at one lender, 30 days at another, a 34-day average at a third."], // D1, E1, G1
-  ["Short-term rental", "On the DSCR timeline", "The appraisal plus the income figure: an AirDNA projection on a purchase, 12 months of bookings on a refinance."], // L2, E3
-  ["BRRRR", "1–3 weeks for the rehab loan, 2–5 weeks for the refinance", "The rehab loan closes like a flip. The refinance can follow once the work is done and the house is rented: right away with an in-house refinance, or after about 90 days of seasoning elsewhere."], // L1, L3; RC1/C1, K1
-  ["Ground-up construction", "Rarely published", "Plans, permits, the budget and your build history are reviewed before closing. After it, draws fund in 1–2 days by photo or virtual inspection at the faster lenders."], // L4, LO3
-];
+type Speed = { loan: string; figure: string; detail: string; ready: string };
 
-const LOOK_AT = [
-  ["Leverage", "Loan-to-value on rentals; loan-to-cost and after-repair value on flips and builds. It sets your down payment and your rate tier."],
-  ["The property's cash flow", "For rental loans, rent divided by the full payment (DSCR). Your personal income usually isn't part of it."],
-  ["Experience", "Flips, builds and rentals in the last two to three years. More experience means more leverage and better pricing on project loans."],
-  ["Credit", "Lenders price in 20-point bands. 700+ opens most programs; 740+ gets the best leverage."],
-  ["Liquidity", "Cash for the down payment, closing costs and a few months of reserves."],
-  ["The exit", "How a short-term loan gets repaid — a sale or a refinance into a long-term rental loan."],
-];
-
-const BY_LOAN: string[][] = [
-  // G1 620 … A1 680; K1, L1, LO1, E1, RC1, C1 80%; D1, G1, A1 85%; K1 none, D1 3 mo, E1 3–9 mo
-  ["DSCR rental", "620–680", "Up to 80% of value on a purchase; 85% at a few lenders for 720–740+ credit", "Rent ÷ PITIA, usually 1.00 or more, and reserves of none to 9 months of payments"],
-  // L2 700, 75/70%; E1 80/75%; E3 0% haircut for professional hosts, 25% for newer
-  ["Short-term rental", "700 at the lender that publishes one", "75–80% of value on a purchase; 70–75% on a cash-out", "Projected or actual nightly income, cut by up to 25% for newer hosts at one lender"],
-  // E2 600; R1, NS 650; L3 660; R1 experience tiers
-  ["Fix and flip and hard money", "600–660", "85–100% of the purchase plus 100% of the rehab, capped at 70–80% of ARV", "Your track record: more completed flips move you to higher leverage and lower rates"],
-  // RC5 660, 70% LTV; L5 700, 85%; RC5 exit DSCR 1.10
-  ["Bridge", "660–700", "70–85% of value", "The exit — a sale, or a refinance that one lender wants to show a 1.10 DSCR"],
-  // LO5 95% LTC rehab, ~75% of ARV refi
-  ["BRRRR", "As for a flip, then a DSCR loan", "Up to 95% of cost on the rehab loan; about 75% of ARV on the refinance", "The after-repair appraisal, and the lease once the property is rented"],
-  // R1 650; K5, RC4/C4, R1, L4, LO3, NS LTC; K5, LO3, RC4/C4, L4, R1 ARV; LO3, RC4/C4, L4 experience
-  ["Ground-up construction", "650 at the lender that publishes one", "82.5–90% of cost, capped at 65–75% of completed value", "Usually at least one ground-up project completed in about the last 3 years"],
-  // RC2/C2, R1 680; RC2/C2, LO4 80/75%, R1 60–70/55–65%; LO4 1.0, RC2/C2 1.05; RC2/C2 90%+ leased
-  ["Rental portfolio", "680", "Up to 80% of value on a purchase; 55–75% on a cash-out", "Combined rent at a 1.00–1.05 DSCR, and 90%+ of units leased at some lenders"],
-  // DSCR minimums; L1, LO1, E1, RC1, C1 75%, G1, D1 80%; K1, LO1, L1 90 days
-  ["Cash-out refinance", "620–680", "70–80% of appraised value, most often 75%", "Seasoning — usually 90 days of ownership — and rent that covers the new, larger payment"],
-];
-
-const DOCS: { title: string; items: string[] }[] = [
+const SPEED: Speed[] = [
   {
-    title: "Every loan",
-    items: [
-      "Photo ID for each borrower and guarantor",
-      "The purchase contract, or the current mortgage statement on a refinance",
-      "Recent bank statements showing the down payment, closing costs and any reserves",
-      "An insurance quote for the property",
-      "If you're closing in an LLC: articles of organization, operating agreement, EIN letter and certificate of good standing",
-    ],
+    // K4, LO6
+    loan: "Bridge",
+    figure: "7–14 business days",
+    detail: "With light or no rehab there's no budget to review, so the valuation and title search are most of the work.",
+    ready: "Send the contract, your entity papers and proof of funds the day you apply.",
   },
   {
-    title: "Rental and cash-out (DSCR) loans",
-    items: [
-      "The lease, if the property is rented; a vacant property can qualify on market rent", // RC1/C1
-      "Reserves of none to 9 months of payments, depending on the lender and loan size", // K1, D1, E1
-      "For a portfolio loan, a rent roll and the lease for each property",
-      "No tax returns, W-2s or pay stubs",
-    ],
+    // K3 7 days; LO2 7–10 business days; R1 10 business days; L3 ~3 weeks
+    loan: "Fix and flip, hard money",
+    figure: "7 days at the fastest",
+    detail: "Other published times: 7–10 business days, 10 business days and about three weeks. The valuation and the rehab budget review set the pace.",
+    ready: "A line-item scope of work sent with the contract saves more time than anything else.",
   },
   {
-    title: "Short-term rental loans",
-    items: [
-      "On a purchase, an income projection — lenders commonly use AirDNA", // L2, A1, G1, E1
-      "On a refinance, 12 months of booking statements from Airbnb or VRBO", // E3, STR
-      "Any short-term rental permit or registration the city requires",
-    ],
+    // L3 24 hours; E2 48 hours; LO2 same-day virtual
+    loan: "Rehab draws, once you own it",
+    figure: "24–48 hours",
+    detail: "From inspection to money at the lenders that publish it, and same day at one that inspects virtually. You pay interest only on what has been drawn.",
+    ready: "Photograph finished work and request each draw as soon as a stage is done.",
   },
   {
-    title: "Fix and flip, bridge and BRRRR loans",
-    items: [
-      "A line-item rehab budget and scope of work",
-      "A list of past flips, builds and rentals with addresses and dates",
-      "Cash for your share of the purchase plus a few months of interest",
-      "Your exit: the sale price you expect, or the rent and refinance plan",
-    ],
+    // D1 14–21 days; E1 30 days; G1 average 34 days
+    loan: "Rental loan (DSCR), purchase or refinance",
+    figure: "14–21 days at the fastest",
+    detail: "Other lenders publish 30 days and a 34-day average. The appraisal and its rent schedule are the longest wait.",
+    ready: "Have the lease signed and an insurance quote in hand before the appraiser visits.",
   },
   {
-    title: "Ground-up construction loans",
-    items: [
-      "Plans, the permit or its status, and the construction budget and schedule",
-      "Who's building it, and the builds you and they have completed",
-      "The land contract, or proof you own the lot",
-    ],
+    // L1, L3 in-house seasoning waived; RC1/C1, K1 90 days
+    loan: "BRRRR",
+    figure: "Two closings",
+    detail: "The rehab loan closes on the flip clock. The refinance follows on the rental clock, with no seasoning wait when the same lender refinances you, or after about 90 days of ownership elsewhere.",
+    ready: "Line up the tenant while the last trades finish, so the refinance isn't waiting on a lease.",
+  },
+  {
+    // L4, LO3 draws 1–2 days by photo or virtual inspection
+    loan: "Ground-up construction",
+    figure: "Rarely published",
+    detail: "Underwriting covers the plans, permits, budget and your past builds before anything closes. Once you're building, the faster lenders fund each draw in 1–2 days off a photo or virtual inspection.",
+    ready: "Bring permits issued, or a firm date for them, plus your builder's contract and schedule.",
   },
 ];
 
-const GUIDES = [
-  { tag: "DSCR", title: "DSCR loan requirements: credit, down payment, ratio and reserves", href: "/dscr-loans/requirements" },
-  { tag: "DSCR", title: "DSCR loan rates: where published grids sit and what moves yours", href: "/dscr-loans/rates" },
-  { tag: "DSCR", title: "DSCR loan vs conventional: pay a little more in rate, or prove your income", href: "/guides/dscr-loan-vs-conventional" },
-  { tag: "FIX & FLIP", title: "The 70% rule — and the better way to set your maximum offer", href: "/guides/70-percent-rule" },
-  { tag: "FIX & FLIP", title: "Fix and flip loans with no experience: what first-timers bring to closing", href: "/guides/fix-and-flip-loans-no-experience" },
-  { tag: "SHORT-TERM RENTAL", title: "How lenders count Airbnb income for a DSCR loan", href: "/guides/dscr-loan-airbnb-income" },
+/* ------------------------------------------------------------------ */
+/* How it works                                                         */
+/* ------------------------------------------------------------------ */
+
+const STEPS: [string, string][] = [
+  [
+    "Your name and number",
+    "The first screen asks for your name, your mobile number, an email if you want to add one, and your OK to be called and texted. That's what lets a loan specialist reach you while the deal is still live.",
+  ],
+  [
+    "A few quick taps",
+    "Then one question per screen: whether anyone will live in the property, the loan type, buying or refinancing, the property type, the amount, your credit range and, on project loans, how many deals you've done. The ZIP code goes last. No documents, no credit pull.",
+  ],
+  ["A call about the deal", "A loan specialist calls you back to go through the price, the rehab, the ARV or rent, and your closing date. Keep the contract nearby if you have one."],
+  ["Your terms", "You hear the leverage, the rate, the points and what you'd bring to closing, so you can check the deal still pencils before you commit to anything."],
+  ["Close and fund", "Valuation, title and documents, then the closing. On rehab and construction loans, the work money follows in draws after each inspection."],
 ];
+
+/* ------------------------------------------------------------------ */
+/* Rental exit                                                          */
+/* ------------------------------------------------------------------ */
+
+// Same ranch, kept. Refinance at 75% of a $292,000 appraisal (LO5; L1, LO1, E1, RC1, C1) = 219,000.
+// 7.5% over 360 months: r = 0.00625; P&I = 219,000 × 0.00625 ÷ (1 − 1.00625^−360) = $1,531.28.
+// PITIA = 1,531 + 260 tax + 140 insurance (assumed) = 1,931. DSCR = 2,250 ÷ 1,931 = 1.165.
+// Rate: inside LendingOne's 7–9% average investor rate (LO7, 2026-09-22), just above the 7.375% 2025 HMDA 30-year investor median (HM).
+// Interest-only: 219,000 × 0.00625 = 1,368.75 → PITIA 1,769 → 1.272.
+// Vacant at 90% of market rent (RC1/C1): 2,025 ÷ 1,931 = 1.049, under RC1/C1's 1.05 minimum.
+// Seasoning: five months of ownership at the refinance is past the 90 days RC1/C1 and K1 ask for.
+const RENTAL_EXAMPLE = {
+  title: "SAME RANCH, KEPT AS A RENTAL",
+  rows: [
+    ["Appraised value after the rehab", "$292,000"],
+    ["New rental loan, 75% of value", "$219,000"],
+    ["Flip loan it pays off", "$208,600"],
+    ["Principal and interest, 7.5%, 30 years", "$1,531"],
+    ["Taxes and insurance", "$400"],
+    ["Full monthly payment (PITIA)", "$1,931"],
+  ] as [string, string][],
+  result: { label: "DSCR = $2,250 rent ÷ $1,931", value: "1.17" },
+  note: "7.5% sits inside the 7–9% average investor rate one lender reported in September 2026. Taxes ($260 a month) and insurance ($140) are assumptions. Illustrative only.",
+  dscr: 1.17,
+};
+
+const RENTAL_LEVERS: [string, string][] = [
+  // L1, R1 1.00; RC1/C1 1.05; K1 0.8; LO1, D1 0.75
+  ["The minimum", "For one rental, October 2026 minimums spanned 0.75 to 1.05, with 1.00 the usual line. At 1.17, this house clears every one of them."],
+  // K1 lower of lease and 110% of market rent; RC1/C1 90% of market rent if vacant
+  [
+    "Which rent counts",
+    "Lenders use the lease or the appraiser's market rent, whichever is lower, and one lets a lease run up to 110% of market. Refinance it empty and two lenders count only 90% of market rent: $2,025 here, a 1.049 ratio, just under their 1.05 floor. Sign the lease first.",
+  ],
+  // IO usually 10 years (research table §1)
+  ["Interest-only", "Where it's offered, usually for the first 10 years, interest-only cuts the loan payment to $1,369 and PITIA to $1,769. Same rent, a 1.27 ratio."],
+  // L1, L3 in-house seasoning waived; RC1/C1, K1 90 days (K1 FAQ: cash-out after 90 days of ownership, checked 2026-10-26)
+  [
+    "Timing",
+    "When the lender that made the rehab loan also does the refinance, seasoning is usually waived. Elsewhere, most lenders want the deed in your name for about 90 days before they'll do a cash-out. This ranch took five months to finish, so it would be well past that.",
+  ],
+];
+
+/* ------------------------------------------------------------------ */
+/* Guides                                                               */
+/* ------------------------------------------------------------------ */
+
+const GUIDE_GROUPS: { tag: string; items: [string, string][] }[] = [
+  {
+    tag: "Fix & flip",
+    items: [
+      ["how-to-calculate-arv", "Pricing the finished house: ARV from comps, and how the lender checks it"],
+      ["rehab-budget-for-lenders", "The scope of work and rehab budget an underwriter will actually fund"],
+      ["cash-needed-to-flip-a-house", "Cash to flip a house: down payment, rehab gap, closing and carry"],
+    ],
+  },
+  {
+    tag: "Financing basics",
+    items: [
+      ["how-hard-money-loans-work", "Hard money, decoded: points, rates, interest-only months and the balloon"],
+      ["closing-an-investor-loan-fast", "What really sets your closing date, and how to be deal-ready early"],
+      ["bridge-loan-exit-strategies", "Bridge loan exits: sale, refinance or lease-up, and what if it slips"],
+      ["ltv-vs-ltc-vs-arv", "LTV, LTC and ARV side by side: three ways a loan gets its size"],
+      ["investor-loan-points-and-fees", "Points, origination, extensions and exit fees on investor loans"],
+    ],
+  },
+  {
+    tag: "BRRRR",
+    items: [
+      ["brrrr-method-step-by-step", "One BRRRR deal, from offer to refinance, worked all the way through"],
+      ["refinance-after-rehab", "Refinancing out of a rehab loan: appraisal, seasoning and cash back"],
+    ],
+  },
+  {
+    tag: "Rentals",
+    items: [["rental-cash-flow-before-you-buy", "Test the rent, cash flow and coverage ratio before you make the offer"]],
+  },
+  {
+    tag: "Construction",
+    items: [["construction-draw-schedule", "How a construction draw schedule and site inspections pay your builder"]],
+  },
+];
+
+/* ------------------------------------------------------------------ */
+/* FAQ (the Faq component builds the FAQPage JSON-LD from this list)   */
+/* ------------------------------------------------------------------ */
 
 const FAQ = [
   {
-    q: "How fast can I get funded?",
-    // K4, LO6; K3, LO2, R1; D1, E1, G1
-    a: "Fast. Leave your name and number and a loan specialist calls you back to go over the deal. After that, the loan type sets the clock: lenders publish 7–14 business days for bridge loans, about one to three weeks for fix and flip loans, and two to five weeks for DSCR rental loans, where the appraisal and rent schedule take the longest.",
+    q: "How quickly can I get a flip loan closed?",
+    // K3 7 days; LO2 7–10 business days; R1 10 business days; K4, LO6 bridge 7–14 business days
+    a: "With a complete file, in about one to three weeks. In October 2026 one national lender published a 7-day close on flips, and others quoted 7–10 or 10 business days. Bridge loans with little or no rehab ran 7–14 business days. What usually holds a flip up is the valuation and the rehab budget review, so send a line-item scope of work along with your purchase contract.",
   },
   {
-    q: "Does applying affect my credit?",
-    a: "No. The application never pulls your credit; it asks only for a rough range, which is enough to talk through terms. A credit check does come before closing, and we'll tell you before it happens. Published minimums run from about 600 to 680 depending on the loan, so a rough range shows which programs fit.",
+    q: "How much cash do I need to flip a house?",
+    // 90% of price: RC3/C3, NS, E2; points E2 0–2
+    a: "More than the down payment alone. At 90% of the price and 100% of the rehab, you bring the other 10% of the price, up to 2 points, lender and title fees, and the interest and holding costs until the house sells. On the $164,000 ranch worked through above, that came to about $37,300 in total, with $26,367 of it due on closing day.",
   },
   {
-    q: "Can I use these loans for a home I'll live in?",
-    a: "No. We only lend on non-owner-occupied properties — rentals, flips, new builds and portfolios. If you, a family member or an owner of your LLC will live in the property, even part-time, you need a residential mortgage lender. That includes living in one unit of a duplex or fourplex you're buying.",
+    q: "Can a first-time flipper get a fix and flip loan?",
+    // RC3, C3, NS no experience requirement; R1 tiers; ARV cap 60–70% for new investors/heavy rehab
+    a: "Yes, at many lenders. Several fix and flip programs published in October 2026 listed no experience requirement at all. What changes for a first flip is leverage: tiered lenders advance less, and caps of 60–70% of after-repair value are common for new investors and heavy rehabs. Plan to bring more cash, and pick a contractor whose finished jobs you can show the lender.",
   },
   {
-    q: "Do I need an LLC to get an investment property loan?",
-    // L1, RC1/C1, LO1 require or allow entities; G1 LLC + personal guarantee
-    a: "Not always. Many rental and flip loans can close in your own name or in an LLC; some programs require an entity, and lenders that lend to one usually ask the owners for a personal guarantee. Whether an LLC makes sense for your taxes and liability is a question for a CPA or attorney, not a loan specialist.",
+    q: "What credit score do I need for a hard money loan?",
+    // E2 600; R1, NS 650; L3 660; RC5 660, L5 700; G1 620 … A1 680
+    a: "Published minimums for fix and flip and hard money loans ran from 600 to 660 in October 2026. Bridge lenders asked for 660–700, and long-term rental lenders 620–680. Because hard money is sized mostly on the property and your exit, your score is one input among several, not the whole decision.",
   },
   {
-    q: "What do you need from me to get started?",
-    a: "Your name and mobile number, then a few quick taps: whether anyone will live in the property, what you're financing, roughly how much you need, your credit range and the property's ZIP code. That's all it takes to start. Documents — the purchase contract, bank statements, leases or a rehab budget — come later, once you've talked through the deal with a loan specialist.",
+    q: "Bridge loan or fix and flip loan: which one fits my deal?",
+    // RC5, L5 70–85%; RC5 12, L5 13/19, K4 12/18/24 months
+    a: "It comes down to the renovation. A flip loan covers both the purchase and the rehab, releases the rehab money in draws, and caps the total at a share of after-repair value. Bridge money is meant for houses that need light work or none: it's sized on today's value, typically 70–85%, and gives you 12–24 months to sell or refinance. Both are short-term loans repaid by that exit.",
   },
   {
-    q: "What is PITIA?",
-    a: "PITIA is the full monthly cost of carrying a financed property: principal, interest, property taxes, insurance and association (HOA or condo) dues. DSCR lenders divide the monthly rent by PITIA, not by the loan payment alone, so a high tax bill or an expensive insurance policy lowers your ratio even when the rate is good. Taxes and insurance count as one-twelfth of the yearly bill.",
+    q: "How does a BRRRR refinance work?",
+    // LO5 ~75% of ARV; L1, L3 in-house waived; RC1/C1, K1 90 days
+    a: "Once the rehab is finished and a tenant is in, a long-term rental loan pays off the rehab loan. Lenders size it at about 75% of the after-repair appraisal and qualify it on the rent against the new payment. If the lender that made the rehab loan also refinances it, seasoning is usually waived; elsewhere, expect about 90 days of ownership first. The appraisal decides how much cash comes back.",
   },
   {
-    q: "Can I get a DSCR loan if the rent doesn't cover the payment?",
-    // K1 0.8; LO1, D1 0.75; G1 no-ratio up to 75% LTV with 700+; A1
-    a: "Sometimes. A ratio below 1.00 means the rent falls short of the full payment. In October 2026, a few lenders published minimums of 0.75 or 0.80, and some offered no-ratio programs — one up to 75% loan-to-value with a 700+ credit score. Expect a bigger down payment and a higher rate than on a loan at 1.00 or above.",
+    q: "What does DSCR mean on a rental loan?",
+    // L1, R1 1.00; RC1/C1 1.05; LO1, D1 0.75
+    a: "It's short for debt service coverage ratio, and it compares what a rental earns with what it costs to carry: monthly rent divided by the full monthly payment, with principal, interest, taxes, insurance and any HOA dues all counted. At 1.00 the rent covers the payment exactly. In October 2026 the most common published minimum was 1.00, a couple of lenders asked 1.05, and some went as low as 0.75. Your salary isn't part of the math.",
   },
   {
-    q: "How much down payment do I need for an investment property loan?",
-    // DSCR 80% (D1, G1 85% at 740+; A1 720+); flip 85–100% LTC; construction 82.5–90% LTC
-    a: "It depends on the loan. DSCR rental lenders published an 80% maximum loan-to-value on purchases in October 2026, so 20% down, or 15% at a few lenders for 720–740+ credit. Fix and flip lenders financed 85–100% of the purchase plus the rehab, within an after-repair-value cap. Construction lenders lent 82.5–90% of total cost. Closing costs come on top.",
+    q: "Can I use one of these loans for a home I'll live in?",
+    // docs/research/compliance-2026-10.md: business-purpose and occupancy affidavit
+    a: "No. Every loan on this site is business-purpose credit for investment property: flips, rentals, new builds and refinances of houses you hold to sell or rent. Planning to live there yourself, or to move a relative in, even into one side of a duplex you're buying? That calls for a residential mortgage lender instead. Before closing, expect to sign a business-purpose and occupancy statement confirming no one in the family will live there.",
   },
   {
-    q: "What credit score do I need for an investment property loan?",
-    // E2, R1, NS, L3; G1 … A1; R1; RC5, L5; RC2/C2, R1; D1, G1 740+
-    a: "Published minimums in October 2026: 600–660 for fix and flip, 620–680 for DSCR rental loans, 650 for ground-up construction at the one lender that lists it, 660–700 for bridge loans and 680 for rental portfolios. Clearing the minimum gets you in; leverage and pricing improve in steps above it, with the best terms usually starting around 740.",
+    q: "Does applying pull my credit?",
+    // published minimums 600 (E2) to 680 (A1, RC2/C2, R1)
+    a: "No. The form asks for a rough credit range, not your Social Security number, and nothing touches your credit file. A range is enough to see which programs fit, since the published floors sit between roughly 600 and 680, by loan type. A full credit report is ordered later in the process, before closing, and you'll be told before it's run.",
   },
   {
-    q: "What's the difference between a DSCR loan and a hard money loan?",
-    // K1, R1, LO1, L1 terms; E2, R1, K3 6–24 months; D2 grid; HM 9.99%
-    a: "Time and what each qualifies on. A DSCR loan is long-term — usually a 30-year fixed rate or an ARM — and qualifies on the property's rent against its payment. A hard money loan runs 6–24 months, interest-only, and is sized on the property's value and your exit. Published DSCR grids ran about 6.25–7.875% in October 2026; the 2025 median short-term investor rate was 9.99%.",
+    q: "How much can I borrow on a ground-up construction loan?",
+    // K5, RC4/C4, R1, L4, LO3, NS 82.5–90% LTC; L4, RC4/C4 100% hard costs; RC4/C4, L4 60–75% land; 65–75% ARV; LO3, RC4/C4, L4 experience; loan sizes to $10M
+    a: "Published October 2026 terms ran 82.5–90% of total project cost, with 100% of hard costs paid out in draws and 60–75% of the lot advanced at closing. The total is also capped at 65–75% of the finished value. Expect to show a ground-up project you finished within about three years, and program limits reach $10 million at several.",
   },
   {
-    q: "Do investment property loans have prepayment penalties?",
-    // E1, D2, G1, LO1, K1; L5, K4
-    a: "Rental loans usually do; short-term loans often don't. On DSCR loans, a 5-4-3-2-1 step-down is the common default: 5% of the amount prepaid in year one, falling a point a year to 1% in year five. Shorter penalties, or none, cost more in rate. Several published bridge programs carry no prepayment penalty at all.",
-  },
-  {
-    q: "What is a business-purpose loan?",
-    // 12 CFR 1026.3(a)(1); Supplement I comment 3(a)-4; occupancy affidavits (docs/research/compliance-2026-10.md)
-    a: "A loan for property you hold as an investment — to buy, fix, build or refinance a rental or a flip — rather than a home you live in. Federal Truth in Lending rules treat credit for a rental the owner doesn't occupy as business purpose, but not if the owner expects to live there more than 14 days in the coming year. Lenders ask you to confirm occupancy in writing.",
-  },
-  {
-    q: "How much can I borrow?",
-    // R1, L1, LO1, RC1/C1, A1, E1, G1 DSCR; RC3/C3, E2, K3, L3, NS flip; RC5, L5, K4 bridge; RC4/C4, R1, L4, K5 construction
-    a: "Published program limits in October 2026 ran from about $50,000–$75,000 at the low end to $4.5–5 million at the top for a single loan: roughly $70,000–$4.5 million for DSCR rentals, $50,000–$5 million for fix and flip and bridge loans, and up to $10 million for ground-up construction. Within those limits, the property's value, rent or project cost sets your loan.",
+    q: "Can I close the loan in my LLC?",
+    // LLC vesting allowed everywhere; required at L1, RC1, C1; G1 LLC + personal guarantee
+    a: "Usually, yes. Every rental lender in our October 2026 review allowed LLC ownership, and three required it. Expect the lender to ask the LLC's owners to sign a personal guarantee and to see the company's formation papers and EIN letter. Whether an LLC suits your taxes and liability is a question for your CPA or attorney, not for a loan specialist.",
   },
 ];
+
+/* ------------------------------------------------------------------ */
+/* Small page-only components                                           */
+/* ------------------------------------------------------------------ */
+
+function SectionHead({ id, eyebrow, title, children }: { id?: string; eyebrow: string; title: string; children?: ReactNode }) {
+  return (
+    <div id={id} className="flex max-w-[740px] scroll-mt-24 flex-col gap-3">
+      <Eyebrow>{eyebrow}</Eyebrow>
+      <H2>{title}</H2>
+      {children && <div className="flex flex-col gap-3 text-[17px] leading-relaxed text-ink-2">{children}</div>}
+    </div>
+  );
+}
+
+function TextLink({ href, children }: { href: string; children: ReactNode }) {
+  return (
+    <Link href={href} className="text-[15px] font-semibold underline-offset-4 hover:underline">
+      {children}
+    </Link>
+  );
+}
+
+function DealCard({ d }: { d: Deal }) {
+  return (
+    <article className="flex flex-col gap-4 rounded-2xl border border-line bg-white p-6">
+      <div className="flex items-baseline justify-between gap-3">
+        <h3 className="text-[22px] font-semibold tracking-[-0.02em]">{d.label}</h3>
+        <Link href={d.href} className="font-mono text-xs text-muted hover:text-brand">
+          {d.loan} →
+        </Link>
+      </div>
+      <p className="text-[15px] leading-relaxed text-ink-2">{d.situation}</p>
+      <div className="mt-auto flex flex-col gap-1 rounded-xl bg-paper p-4">
+        <span className="font-mono text-[26px] leading-none tracking-[-0.02em] text-brand">{d.stat}</span>
+        <span className="text-sm leading-snug text-ink-2">{d.statText}</span>
+      </div>
+      <div className="flex flex-wrap items-center gap-x-5 gap-y-2">
+        <ButtonLink href={d.apply}>{d.cta}</ButtonLink>
+        <Link href={d.href} className="text-sm font-semibold underline-offset-4 hover:underline">
+          Full terms
+        </Link>
+      </div>
+    </article>
+  );
+}
+
+function NeedsSheet({ n }: { n: Needs }) {
+  return (
+    <div className="flex flex-col gap-3 rounded-2xl border border-line bg-white p-6">
+      <Link href={n.href} className="text-[19px] font-semibold tracking-[-0.02em] hover:text-brand">
+        {n.title} →
+      </Link>
+      <dl className="flex flex-col text-[15px]">
+        {n.rows.map(([k, v]) => (
+          <div key={k} className="grid gap-1 border-t border-line py-3 sm:grid-cols-[112px_1fr] sm:gap-4">
+            <dt className="font-mono text-xs uppercase tracking-[0.06em] text-muted sm:pt-1">{k}</dt>
+            <dd className="leading-relaxed text-ink-2">{v}</dd>
+          </div>
+        ))}
+      </dl>
+    </div>
+  );
+}
+
+function SpeedRow({ s }: { s: Speed }) {
+  return (
+    <li className="grid gap-3 border-t border-night-line py-6 md:grid-cols-[minmax(0,1fr)_minmax(0,2fr)] md:gap-10">
+      <div className="flex flex-col gap-1">
+        <span className="font-mono text-xs uppercase tracking-[0.08em] text-mist-2">{s.loan}</span>
+        <span className="font-mono text-[clamp(24px,2.6vw,32px)] leading-tight tracking-[-0.02em] text-lime">{s.figure}</span>
+      </div>
+      <div className="flex flex-col gap-2 text-[15px] leading-relaxed">
+        <p className="text-mist">{s.detail}</p>
+        <p className="flex gap-2.5 text-paper">
+          <Check className="mt-1.5 text-lime" />
+          <span>{s.ready}</span>
+        </p>
+      </div>
+    </li>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/* Page                                                                 */
+/* ------------------------------------------------------------------ */
 
 export default function Home() {
   return (
     <>
-      {/* Hero. Phones: headline, then the form, then the copy. Wide screens: copy left, form right, above the fold. */}
-      <section>
-        <Container className="grid items-start gap-x-12 gap-y-6 pb-16 pt-8 sm:pt-12 lg:grid-cols-2 lg:grid-rows-[auto_1fr] lg:pt-20">
-          <div className="flex flex-col gap-5 lg:col-start-1 lg:row-start-1 lg:pt-6">
-            <Eyebrow>Business-purpose loans · Investment property only</Eyebrow>
-            <h1 className="text-[clamp(40px,5.2vw,70px)] font-semibold leading-[1.02] tracking-[-0.04em]">Fast funding for real estate investors.</h1>
+      {/* Hero. Phones: headline, then the form, then the rest. Desktop: form on the right, above the fold. */}
+      <section className="border-b border-line">
+        <Container className="grid items-start gap-x-14 gap-y-7 pb-16 pt-8 sm:pt-12 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,1fr)] lg:grid-rows-[auto_1fr] lg:pt-16">
+          <div className="flex flex-col gap-4 lg:col-start-1 lg:row-start-1 lg:pt-4">
+            <Eyebrow>Flip · Bridge · BRRRR · New build · Rental refinance</Eyebrow>
+            <h1 className="text-[clamp(38px,5vw,64px)] font-semibold leading-[1.03] tracking-[-0.04em]">Got a deal? Get it funded before your closing date.</h1>
           </div>
           <div id="start" className="scroll-mt-24 lg:col-start-2 lg:row-span-2 lg:row-start-1">
             <LeadForm variant="card" />
           </div>
-          <div className="flex flex-col gap-6 lg:col-start-1 lg:row-start-2">
-            <p className="max-w-[34em] text-[19px] leading-relaxed text-ink-2">
-              {SITE.name} gets real estate investors funded fast on investment property: DSCR (debt service coverage ratio) rental loans, fix and flip, bridge, BRRRR, ground-up
-              construction and portfolio loans. Leave your name and number and a loan specialist calls you back with your terms.
+          <div className="flex flex-col gap-7 lg:col-start-1 lg:row-start-2">
+            <p className="max-w-[36em] text-[18px] leading-relaxed text-ink-2">
+              {SITE.name} is for real estate investors with a deal in hand: fix and flip, hard money, bridge, BRRRR and ground-up construction loans, plus the rental loan you
+              refinance into once the work is done. Start with your name and number, answer a few taps, and a loan specialist calls you to talk through what this deal
+              needs.
             </p>
-            <ul className="mt-2 flex flex-col gap-3 text-[15px] text-ink-2">
-              <li className="flex items-center gap-2.5">
-                <Check />
-                Apply in about 60 seconds — no credit pull
-              </li>
-              <li className="flex items-center gap-2.5">
-                <Check />
-                Rental loans that qualify on the rent, not your tax returns
-              </li>
-              <li className="flex items-center gap-2.5">
-                <Check />
-                Business-purpose loans for property you won&apos;t live in
-              </li>
-            </ul>
-            <div className="mt-4 flex flex-wrap gap-x-8 gap-y-3 border-t border-line pt-6 font-mono text-[13px] text-ink-2">
-              <Link href="#dscr" className="hover:text-brand">
-                What is DSCR? →
-              </Link>
-              <Link href="/calculators/dscr" className="hover:text-brand">
-                DSCR calculator →
-              </Link>
-              <Link href="/rates" className="hover:text-brand">
-                Investor rates →
-              </Link>
-              <Link href="/loans" className="hover:text-brand">
-                All programs →
-              </Link>
+            <div className="flex flex-col gap-3">
+              <p className="font-mono text-xs uppercase tracking-[0.08em] text-muted">Four numbers to have ready for the call</p>
+              <dl className="grid gap-px overflow-hidden rounded-2xl border border-line bg-line sm:grid-cols-2">
+                {CALL_NUMBERS.map(([k, v]) => (
+                  <div key={k} className="flex flex-col gap-1 bg-white p-4">
+                    <dt className="text-[15px] font-semibold">{k}</dt>
+                    <dd className="text-sm leading-snug text-ink-2">{v}</dd>
+                  </div>
+                ))}
+              </dl>
             </div>
+            <p className="max-w-[36em] border-l-2 border-brand pl-4 text-[15px] leading-relaxed text-ink-2">
+              <b className="font-semibold text-ink">Investment property only.</b> Every loan here is business-purpose credit for a property you&apos;ll sell or rent out, not a home loan. If you or your family
+              will live there, a residential mortgage lender is the place to go. Applying never pulls your credit.
+            </p>
           </div>
         </Container>
       </section>
 
-      {/* Typical terms strip */}
-      <section className="border-y border-line bg-white">
-        <Container className="grid gap-px [grid-template-columns:repeat(auto-fit,minmax(min(100%,240px),1fr))]">
-          {TERMS.map((t) => (
-            <div key={t.k} className="flex flex-col gap-1.5 py-7 sm:px-2">
-              <span className="font-mono text-[30px] tracking-[-0.02em]">{t.k}</span>
-              <span className="text-[15px] leading-snug text-ink-2">{t.v}</span>
-            </div>
-          ))}
+      {/* What's your deal? */}
+      <section>
+        <Container className="flex flex-col gap-10 py-[88px]">
+          <SectionHead id="deals" eyebrow="Start with the deal" title="What's your deal? Find the one that looks like yours.">
+            <p>
+              Each kind of deal has its own loan, and each loan is sized a different way. Pick the closest match, check the number that usually decides it, then open the program
+              page for the full terms.
+            </p>
+          </SectionHead>
+          <div className="grid gap-4 [grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr))]">
+            {DEALS.map((d) => (
+              <DealCard key={d.key} d={d} />
+            ))}
+          </div>
+          <p className="max-w-[760px] text-[15px] leading-relaxed text-ink-2">
+            Something else?{" "}
+            <Link href="/hard-money-loans" className="font-semibold underline underline-offset-2">
+              Hard money
+            </Link>{" "}
+            covers fast or distressed purchases sized on the property itself,{" "}
+            <Link href="/short-term-rental-loans" className="font-semibold underline underline-offset-2">
+              short-term rental loans
+            </Link>{" "}
+            fund Airbnb and VRBO homes, and{" "}
+            <Link href="/rental-portfolio-loans" className="font-semibold underline underline-offset-2">
+              portfolio loans
+            </Link>{" "}
+            put several rentals under one note. Or{" "}
+            <Link href="/loans" className="font-semibold underline underline-offset-2">
+              see every program
+            </Link>
+            .
+          </p>
         </Container>
-        <Container className="pb-5">
-          <p className="font-mono text-xs text-muted">
-            Published lender terms, October 2026.{" "}
+      </section>
+
+      {/* What each loan needs */}
+      <section className="border-t border-line bg-white">
+        <Container className="flex flex-col gap-10 py-[88px]">
+          <SectionHead id="what-it-needs" eyebrow="What it takes" title="What your deal needs to get funded, loan by loan.">
+            <p>
+              Four things decide most investor loans: your credit, your track record, how much of the deal the lender will advance, and the cash you bring to closing. Credit
+              and experience mostly move your tier. Leverage and cash to close decide whether the deal works at all.
+            </p>
+          </SectionHead>
+          <div className="grid gap-4 [grid-template-columns:repeat(auto-fit,minmax(min(100%,340px),1fr))]">
+            {NEEDS.map((n) => (
+              <NeedsSheet key={n.title} n={n} />
+            ))}
+          </div>
+          <p className="max-w-[760px] font-mono text-xs leading-relaxed text-muted">
+            Ranges taken from lenders&apos; own program pages on October 19, 2026. They describe the market, not a quote for your deal.{" "}
             <Link href="/rates" className="underline underline-offset-2">
-              Sources and current ranges
+              Current rate ranges
+            </Link>{" "}
+            ·{" "}
+            <Link href="/guides/ltv-vs-ltc-vs-arv" className="underline underline-offset-2">
+              LTV, LTC and ARV explained
             </Link>
           </p>
         </Container>
       </section>
 
-      {/* Loan programs, one published fact each */}
-      <section id="loans">
+      {/* Worked flip */}
+      <section>
         <Container className="flex flex-col gap-12 py-[88px]">
-          <div className="flex flex-wrap items-end justify-between gap-6">
-            <div className="flex max-w-[660px] flex-col gap-3">
-              <Eyebrow>Loan programs</Eyebrow>
-              <H2>Every stage of the investment, from the first flip to the fiftieth door.</H2>
-              {/* Terms: K1, R1, LO1, L1 (30-year); E2, K3, L3 (6–24 months) */}
-              <p className="text-[17px] leading-relaxed text-ink-2">
-                Two families of loans cover almost every deal. Rental loans run up to 30 years and are sized on what the property earns. Project loans run 6 to 24 months, charge
-                interest only, and are sized on what you pay and what the property will be worth when the work is done.
-              </p>
-            </div>
-            <Link href="/loans" className="text-[15px] font-semibold underline-offset-4 hover:underline">
-              See all loan programs →
-            </Link>
-          </div>
-          {(["Rental", "Project"] as const).map((g) => (
-            <div key={g} className="flex flex-col gap-4">
-              <h3 className="font-mono text-xs uppercase tracking-[0.08em] text-muted">{g === "Rental" ? "Rental loans — hold and collect rent" : "Project loans — buy, renovate, build"}</h3>
-              <div className="grid gap-4 [grid-template-columns:repeat(auto-fit,minmax(min(100%,200px),1fr))]">
-                {PROGRAMS.filter((p) => p.group === g).map((p) => (
-                  <Link key={p.slug} href={p.href} className="group flex min-h-[190px] flex-col gap-3 rounded-2xl border border-line bg-white p-6 transition-colors hover:border-ink">
-                    <span className="text-[20px] font-semibold tracking-[-0.02em]">{p.title}</span>
-                    <span className="text-[15px] leading-normal text-ink-2">{p.blurb}</span>
-                    {PROGRAM_FACTS[p.slug] && <span className="border-t border-line pt-3 text-sm leading-snug">{PROGRAM_FACTS[p.slug]}</span>}
-                    <span className="mt-auto font-mono text-xs text-muted">{p.term}</span>
-                  </Link>
-                ))}
+          <SectionHead id="worked-flip" eyebrow="A flip, worked through" title="One flip, every number: a $164,000 ranch with a $292,000 exit.">
+            <p>
+              The deal: a 1958 brick ranch bought from an estate for $164,000. The scope is a new kitchen, one bath, a furnace, flooring and paint, budgeted at $61,000. Three
+              closed sales of renovated ranches nearby put the{" "}
+              <Link href="/glossary#arv" className="underline underline-offset-2">
+                after-repair value
+              </Link>{" "}
+              at $292,000, and the plan is five months from closing to sale.
+            </p>
+          </SectionHead>
+          <div className="grid items-start gap-12 [grid-template-columns:repeat(auto-fit,minmax(min(100%,420px),1fr))]">
+            <ol className="flex flex-col">
+              {FLIP_STEPS.map(([t, d], i) => (
+                <li key={t} className="grid grid-cols-[44px_1fr] gap-3 border-t border-line py-5 last:border-b">
+                  <span className="font-mono text-[15px] text-muted">{String(i + 1).padStart(2, "0")}</span>
+                  <div>
+                    <h3 className="text-[18px] font-semibold">{t}</h3>
+                    <p className="mt-1.5 text-[15px] leading-relaxed text-ink-2">{d}</p>
+                  </div>
+                </li>
+              ))}
+            </ol>
+            <div className="flex flex-col gap-5">
+              <ExampleCard example={FLIP_EXAMPLE} />
+              <div className="rounded-2xl border border-line bg-white p-6">
+                <p className="font-mono text-xs uppercase tracking-[0.08em] text-brand">The number that decides it</p>
+                <p className="mt-2 text-[15px] leading-relaxed text-ink-2">
+                  <b className="font-semibold text-ink">The ARV.</b> This deal breaks even at a sale price of about $261,600, 10.4% under the estimate. A low appraisal bites
+                  before you ever list: any figure under about $278,100 starts trimming the loan. At $270,000 the cap falls to $202,500, $6,100 below the loan you planned on,
+                  and you bring roughly $6,000 more to closing.
+                </p>
               </div>
             </div>
-          ))}
+          </div>
+          <div className="flex flex-wrap items-center gap-x-8 gap-y-4">
+            <ButtonLink href="/get-funding?loan=fix-and-flip" size="lg">
+              Fund my flip
+            </ButtonLink>
+            <TextLink href="/calculators/fix-and-flip">Run your own flip →</TextLink>
+            <TextLink href="/guides/how-to-calculate-arv">How to calculate ARV →</TextLink>
+            <TextLink href="/guides/cash-needed-to-flip-a-house">Cash needed to flip →</TextLink>
+          </div>
+        </Container>
+      </section>
+
+      {/* Closing speed */}
+      <section className="bg-ink text-paper">
+        <Container className="flex flex-col gap-10 py-[88px]">
+          <div id="closing-speed" className="flex max-w-[740px] scroll-mt-24 flex-col gap-3">
+            <Eyebrow tone="lime">Closing speed</Eyebrow>
+            <H2 className="text-white">How fast each loan can close, and what slows it down.</H2>
+            <p className="text-[17px] leading-relaxed text-mist">
+              These are the closing times lenders printed on their own program pages in October 2026. Every one assumes a complete file, so the part of the clock you control is
+              how quickly the underwriter gets what they ask for.
+            </p>
+          </div>
+          <ol className="flex flex-col border-b border-night-line">
+            {SPEED.map((s) => (
+              <SpeedRow key={s.loan} s={s} />
+            ))}
+          </ol>
+          <div className="flex flex-wrap items-center gap-x-8 gap-y-4">
+            <ButtonLink href="/get-funding" variant="lime" size="lg">
+              {SITE.cta}
+            </ButtonLink>
+            <Link href="/guides/closing-an-investor-loan-fast" className="text-[15px] font-semibold text-lime underline-offset-4 hover:underline">
+              How to close an investor loan fast →
+            </Link>
+          </div>
         </Container>
       </section>
 
       {/* How it works */}
-      <section className="border-t border-line bg-white">
-        <Container className="grid gap-12 py-[88px] [grid-template-columns:repeat(auto-fit,minmax(min(100%,340px),1fr))]">
-          <div className="flex flex-col gap-3.5">
-            <Eyebrow>How it works</Eyebrow>
-            <H2>Three steps to funded.</H2>
-            <p className="text-[17px] leading-relaxed text-ink-2">No long application and no waiting around. Tell us about the deal, talk to a loan specialist, and close fast.</p>
-            <Link href="/how-it-works" className="text-[15px] font-semibold underline-offset-4 hover:underline">
-              How it works →
-            </Link>
-          </div>
-          <ol className="flex flex-col">
-            {[
-              ["01", "Leave your name and number", "Your contact details first, then a few quick taps about the deal — loan type, amount, credit range. About 60 seconds, no credit pull."],
-              ["02", "Get your terms", "A loan specialist calls you back fast to go over the property, the numbers and your options."],
-              ["03", "Close fast", "Sign and get funded. Short-term loans can close in one to three weeks; rental loans typically in two to five."],
-            ].map(([n, t, d]) => (
-              <li key={n} className="grid grid-cols-[64px_1fr] gap-4 border-t border-line py-6 last:border-b">
-                <span className="font-mono text-[15px] text-muted">{n}</span>
+      <section>
+        <Container className="grid items-start gap-12 py-[88px] lg:grid-cols-[minmax(0,1fr)_minmax(0,1.6fr)]">
+          <SectionHead id="how-it-works" eyebrow="How it works" title="From your phone number to the closing table in five steps.">
+            <p>Contact details come first, so the deal never waits on a long application. The paperwork comes once you&apos;ve talked it through.</p>
+            <p>
+              <TextLink href="/how-it-works">The full process →</TextLink>
+            </p>
+          </SectionHead>
+          <ol className="grid gap-px overflow-hidden rounded-2xl border border-line bg-line">
+            {STEPS.map(([t, d], i) => (
+              <li key={t} className="grid grid-cols-[52px_1fr] gap-3 bg-white p-6">
+                <span className="flex size-9 items-center justify-center rounded-full bg-brand-tint font-mono text-sm text-brand">{i + 1}</span>
                 <div>
-                  <div className="text-[19px] font-semibold">{t}</div>
-                  <p className="mt-1.5 text-base leading-normal text-ink-2">{d}</p>
+                  <h3 className="text-[18px] font-semibold">{t}</h3>
+                  <p className="mt-1.5 text-[15px] leading-relaxed text-ink-2">{d}</p>
                 </div>
               </li>
             ))}
@@ -375,242 +741,100 @@ export default function Home() {
         </Container>
       </section>
 
-      {/* What is a DSCR loan? */}
-      <section id="dscr" className="scroll-mt-20">
-        <Container className="flex flex-col gap-14 py-[88px]">
+      {/* Rental exit */}
+      <section className="border-t border-line bg-white">
+        <Container className="flex flex-col gap-12 py-[88px]">
           <div className="grid items-start gap-12 [grid-template-columns:repeat(auto-fit,minmax(min(100%,420px),1fr))]">
             <div className="flex flex-col gap-5">
-              <Eyebrow>DSCR, in plain English</Eyebrow>
-              <H2>What is a DSCR loan?</H2>
-              <p className="text-[19px] leading-relaxed">
-                A DSCR loan is a long-term loan on a rental property that qualifies on the property&apos;s income instead of yours. DSCR stands for debt service coverage ratio: the
-                property&apos;s monthly rent divided by its full monthly payment. If the rent covers the payment by the margin the lender asks for, your salary, tax returns and
-                debt-to-income ratio stay out of the decision.
-              </p>
-              <p className="text-[17px] leading-relaxed text-ink-2">
-                Lenders call the full payment PITIA. It counts the costs of owning the property, not just the loan, which is why the same rent can clear the bar in one county and
-                miss it in the next.
-              </p>
+              <SectionHead id="rental-exit" eyebrow="The rental exit" title="Keep it instead of selling: refinance out into a rental loan.">
+                <p>
+                  Not every flip has to sell. If the house rents well, a long-term rental loan can pay off the short-term one and you keep the property. On a BRRRR, that
+                  refinance is the plan from day one.
+                </p>
+                <p>
+                  The loan you refinance into is usually a DSCR loan, and DSCR, the debt service coverage ratio, is simple: the monthly rent divided by the full monthly
+                  payment. That payment counts principal, interest, taxes, insurance and any HOA dues, which lenders shorten to{" "}
+                  <Link href="/glossary#pitia" className="underline underline-offset-2">
+                    PITIA
+                  </Link>
+                  . At 1.00 the rent exactly covers it. Above
+                  1.00 there&apos;s money left over; below, you make up the gap. Your paycheck doesn&apos;t enter into it.
+                </p>
+              </SectionHead>
               <Formula>DSCR = monthly rent ÷ monthly PITIA</Formula>
-              <dl className="flex flex-col text-[15px]">
-                {PITIA.map(([letter, term, text]) => (
-                  <div key={term} className="grid grid-cols-[32px_1fr] gap-3 border-t border-line py-3.5 last:border-b">
-                    <dt className="font-mono text-[17px] text-brand" aria-hidden="true">
-                      {letter}
-                    </dt>
-                    <dd className="leading-relaxed text-ink-2">
-                      <b className="font-semibold text-ink">{term}.</b> {text}
-                    </dd>
-                  </div>
-                ))}
-              </dl>
             </div>
-            <div className="flex flex-col gap-5">
-              <ExampleCard example={DSCR_EXAMPLE} />
-              {/* 1,800 ÷ 1,756 = 1.025; 1,756 × 1.25 = 2,195 */}
-              <p className="text-[15px] leading-relaxed text-ink-2">
-                Change one input and the ratio moves. Rent the same house for $1,800 and the ratio drops to 1.03 — above a 1.00 minimum, with $44 a month to spare. To reach 1.25, the
-                rent has to be at least $2,195 ($1,756 × 1.25).
-              </p>
-            </div>
+            <ExampleCard example={RENTAL_EXAMPLE} />
           </div>
-
-          <div className="grid items-start gap-12 [grid-template-columns:repeat(auto-fit,minmax(min(100%,420px),1fr))]">
-            <div className="flex flex-col gap-4">
-              <h3 className="text-[24px] font-semibold tracking-[-0.025em]">What 1.00 and 1.25 mean</h3>
-              <dl className="flex flex-col text-[15px]">
-                {DSCR_LEVELS.map(([k, v]) => (
-                  <div key={k} className="grid gap-1 border-t border-line py-4 last:border-b sm:grid-cols-[110px_1fr] sm:gap-5">
-                    <dt className="font-mono text-[17px]">{k}</dt>
-                    <dd className="leading-relaxed text-ink-2">{v}</dd>
-                  </div>
-                ))}
-              </dl>
-            </div>
-            <div className="flex flex-col gap-4">
-              <h3 className="text-[24px] font-semibold tracking-[-0.025em]">How lenders use the ratio</h3>
-              <dl className="flex flex-col text-[15px]">
-                {DSCR_USES.map(([k, v]) => (
-                  <div key={k} className="grid gap-1 border-t border-line py-4 last:border-b sm:grid-cols-[170px_1fr] sm:gap-5">
-                    <dt className="font-semibold">{k}</dt>
-                    <dd className="leading-relaxed text-ink-2">{v}</dd>
-                  </div>
-                ))}
-              </dl>
-            </div>
-          </div>
-
+          <dl className="grid gap-x-10 [grid-template-columns:repeat(auto-fit,minmax(min(100%,420px),1fr))]">
+            {RENTAL_LEVERS.map(([k, v]) => (
+              <div key={k} className="grid gap-1 border-t border-line py-4 sm:grid-cols-[140px_1fr] sm:gap-5">
+                <dt className="font-semibold">{k}</dt>
+                <dd className="text-[15px] leading-relaxed text-ink-2">{v}</dd>
+              </div>
+            ))}
+          </dl>
+          <p className="max-w-[760px] text-[15px] leading-relaxed text-ink-2">
+            In this case the new $219,000 loan clears the $208,600 flip payoff with $10,400 to spare before the refinance&apos;s own closing costs, and the rent pays the
+            mortgage with $319 a month left for repairs and vacancy.
+          </p>
           <div className="flex flex-wrap items-center gap-x-8 gap-y-4">
             <ButtonLink href="/get-funding?loan=dscr" size="lg">
-              Get DSCR funding
+              Get rental funding
             </ButtonLink>
-            <Link href="/dscr-loans" className="text-[15px] font-semibold underline-offset-4 hover:underline">
-              DSCR loans explained →
-            </Link>
-            <Link href="/calculators/dscr" className="text-[15px] font-semibold underline-offset-4 hover:underline">
-              Calculate your DSCR →
-            </Link>
-            <Link href="/glossary#dscr" className="text-[15px] font-semibold underline-offset-4 hover:underline">
-              DSCR in the glossary →
-            </Link>
+            <TextLink href="/calculators/dscr">DSCR calculator →</TextLink>
+            <TextLink href="/calculators/brrrr">BRRRR calculator →</TextLink>
+            <TextLink href="/guides/refinance-after-rehab">Refinancing after the rehab →</TextLink>
+            <TextLink href="/dscr-loans">Rental loan terms →</TextLink>
           </div>
-        </Container>
-      </section>
-
-      {/* Closing times by loan type */}
-      <section id="closing-times" className="scroll-mt-20 border-t border-line bg-white">
-        <Container className="flex flex-col gap-8 py-[88px]">
-          <div className="flex max-w-[720px] flex-col gap-3">
-            <Eyebrow>Closing times</Eyebrow>
-            <H2>Short-term loans close in days. Rental loans take weeks.</H2>
-            <p className="text-[17px] leading-relaxed text-ink-2">
-              Closing times lenders published on their own program pages in October 2026. They assume a complete file, and the valuation or appraisal is usually the longest wait.
-            </p>
-          </div>
-          <CompareTable columns={["Loan type", "Published closing time", "What sets the pace"]} rows={CLOSING} />
-          <p className="max-w-[720px] text-[15px] leading-relaxed text-ink-2">
-            The fastest closings start with the paperwork ready.{" "}
-            <Link href="#what-you-need" className="font-semibold underline underline-offset-4">
-              See what each loan needs
-            </Link>{" "}
-            and gather it while the appraisal is ordered.
-          </p>
-        </Container>
-      </section>
-
-      {/* What lenders look at */}
-      <section id="underwriting" className="scroll-mt-20">
-        <Container className="flex flex-col gap-10 py-[88px]">
-          <div className="flex max-w-[700px] flex-col gap-3">
-            <Eyebrow>Underwriting, plainly</Eyebrow>
-            <H2>What we look at to fund your deal.</H2>
-            <p className="text-[17px] leading-relaxed text-ink-2">Investor loans are underwritten on the deal far more than on your paycheck. These six things decide your leverage and your rate.</p>
-          </div>
-          <div className="grid gap-x-8 gap-y-2 [grid-template-columns:repeat(auto-fit,minmax(min(100%,330px),1fr))]">
-            {LOOK_AT.map(([t, d], i) => (
-              <div key={t} className="grid grid-cols-[44px_1fr] gap-3 border-t border-line py-5">
-                <span className="font-mono text-[15px] text-muted">{String(i + 1).padStart(2, "0")}</span>
-                <div>
-                  <div className="text-[17px] font-semibold">{t}</div>
-                  <p className="mt-1 text-[15px] leading-relaxed text-ink-2">{d}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-          <div className="flex flex-col gap-4 pt-6">
-            <h3 className="text-[24px] font-semibold tracking-[-0.025em]">What decides the loan, by loan type</h3>
-            <p className="max-w-[720px] text-[15px] leading-relaxed text-ink-2">
-              The same six factors carry different weight on each program. Rental loans lean on the rent; project loans lean on the budget, the finished value and your track record.
-            </p>
-            <CompareTable columns={["Loan type", "Published credit minimums", "Leverage", "What else decides it"]} rows={BY_LOAN} highlight={-1} />
-            <p className="font-mono text-xs leading-relaxed text-muted">
-              Ranges lenders published on their program pages in October 2026. Each lender sets its own minimums; your terms depend on the property, your credit and your experience.
-            </p>
-          </div>
-        </Container>
-      </section>
-
-      {/* What you need to apply and to close */}
-      <section id="what-you-need" className="scroll-mt-20 border-t border-line bg-white">
-        <Container className="flex flex-col gap-10 py-[88px]">
-          <div className="flex max-w-[720px] flex-col gap-3">
-            <Eyebrow>What you need</Eyebrow>
-            <H2>To apply, a name and a phone number. To close, the paperwork below.</H2>
-            <p className="text-[17px] leading-relaxed text-ink-2">
-              The application asks for your name and mobile number first, so a loan specialist can reach you, then a few quick taps about the deal: whether anyone will live in the
-              property, what you&apos;re financing, roughly how much and your credit range. No documents and no credit pull. The paperwork comes once you&apos;ve talked the deal
-              through.
-            </p>
-          </div>
-          <div className="grid gap-x-8 gap-y-10 [grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr))]">
-            {DOCS.map((d) => (
-              <div key={d.title} className="flex flex-col gap-4 border-t-2 border-ink pt-5">
-                <h3 className="text-[19px] font-semibold">{d.title}</h3>
-                <Bullets items={d.items} />
-              </div>
-            ))}
-          </div>
-        </Container>
-      </section>
-
-      {/* Tools */}
-      <section className="bg-ink text-paper">
-        <Container className="flex flex-col gap-10 py-[88px]">
-          <div className="flex flex-wrap items-end justify-between gap-6">
-            <div className="flex max-w-[640px] flex-col gap-3">
-              <Eyebrow tone="lime">Free investor calculators</Eyebrow>
-              <H2 className="text-white">Run the numbers in seconds.</H2>
-            </div>
-            <Link href="/calculators" className="text-[15px] font-semibold text-lime underline-offset-4 hover:underline">
-              All calculators →
-            </Link>
-          </div>
-          <div className="grid gap-px overflow-hidden rounded-2xl border border-night-line bg-night-line [grid-template-columns:repeat(auto-fit,minmax(min(100%,250px),1fr))]">
-            {CALCULATORS.map((t) => (
-              <Link key={t.title} href={t.href} className="flex min-h-[170px] flex-col gap-2.5 bg-ink p-7 transition-colors hover:bg-night">
-                <span className="font-mono text-[28px] text-lime" aria-hidden="true">
-                  {t.sym}
-                </span>
-                <span className="text-[19px] font-semibold">{t.title}</span>
-                <span className="text-[15px] leading-normal text-mist">{t.text}</span>
-              </Link>
-            ))}
-          </div>
-        </Container>
-      </section>
-
-      {/* Rates preview */}
-      <section>
-        <Container className="grid items-start gap-12 py-[88px] [grid-template-columns:repeat(auto-fit,minmax(min(100%,380px),1fr))]">
-          <div className="flex flex-col gap-3.5">
-            <Eyebrow>Investor loan rates</Eyebrow>
-            <H2>Where rates sit right now — with the sources.</H2>
-            <p className="text-[17px] leading-relaxed text-ink-2">
-              Your rate depends on credit, leverage, DSCR, experience and prepayment terms. These ranges come from published lender pricing and federal mortgage data.
-            </p>
-            <Link href="/rates" className="text-[15px] font-semibold underline-offset-4 hover:underline">
-              Full rate table and what moves it →
-            </Link>
-          </div>
-          <RatesTable compact />
         </Container>
       </section>
 
       {/* Guides */}
-      <section className="border-t border-line bg-white">
-        <Container className="flex flex-col gap-9 py-[88px]">
+      <section>
+        <Container className="flex flex-col gap-10 py-[88px]">
           <div className="flex flex-wrap items-end justify-between gap-6">
-            <H2>Investor guides</H2>
-            <Link href="/guides" className="text-[15px] font-semibold underline-offset-4 hover:underline">
-              All guides →
-            </Link>
+            <SectionHead id="guides" eyebrow="Guides" title="Read up before you sign the contract." />
+            <TextLink href="/guides">Every guide →</TextLink>
           </div>
-          <div className="grid gap-x-6 gap-y-9 [grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr))]">
-            {GUIDES.map((g) => (
-              <Link key={g.href} href={g.href} className="flex flex-col gap-2.5 border-t-2 border-ink pt-5 hover:text-brand">
-                <span className="font-mono text-xs text-muted">{g.tag}</span>
-                <span className="text-[21px] font-semibold leading-tight tracking-[-0.02em]">{g.title}</span>
-              </Link>
+          <div className="grid gap-x-8 gap-y-10 [grid-template-columns:repeat(auto-fit,minmax(min(100%,320px),1fr))]">
+            {GUIDE_GROUPS.map((g) => (
+              <div key={g.tag} className="flex flex-col gap-1 border-t-2 border-ink pt-4">
+                <h3 className="font-mono text-xs uppercase tracking-[0.08em] text-muted">{g.tag}</h3>
+                <ul className="flex flex-col">
+                  {g.items.map(([slug, title]) => (
+                    <li key={slug} className="border-b border-line last:border-b-0">
+                      <Link href={`/guides/${slug}`} className="block py-3 text-[17px] font-semibold leading-snug tracking-[-0.01em] hover:text-brand">
+                        {title}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </div>
             ))}
           </div>
         </Container>
       </section>
 
-      {/* FAQ (the Faq component also emits the matching FAQPage JSON-LD) */}
-      <section>
+      {/* FAQ: the Faq component emits FAQPage JSON-LD from the same items */}
+      <section className="border-t border-line bg-white">
         <div className="mx-auto flex max-w-[880px] flex-col gap-7 px-6 py-[88px]">
-          <H2>Questions investors ask us</H2>
+          <div className="flex flex-col gap-3">
+            <Eyebrow>FAQ</Eyebrow>
+            <H2>Straight answers before you apply</H2>
+          </div>
           <Faq items={FAQ} />
         </div>
       </section>
 
-      {/* CTA */}
+      {/* Closing CTA */}
       <section>
-        <Container className="pb-[88px]">
-          <div className="flex flex-wrap items-center justify-between gap-7 rounded-3xl bg-brand p-[clamp(32px,5vw,64px)] text-white">
-            <div className="max-w-[620px]">
-              <h2 className="text-[clamp(30px,3.4vw,44px)] font-semibold leading-[1.08] tracking-[-0.035em]">Get your deal funded fast.</h2>
-              <p className="mt-3 text-[17px] leading-normal text-[#E3EEE7]">About 60 seconds, no credit pull — a loan specialist calls you back.</p>
+        <Container className="py-[88px]">
+          <div className="grid items-center gap-8 rounded-3xl bg-brand p-[clamp(32px,5vw,64px)] text-white md:grid-cols-[minmax(0,1.6fr)_auto]">
+            <div className="flex flex-col gap-3">
+              <h2 className="text-[clamp(30px,3.4vw,44px)] font-semibold leading-[1.08] tracking-[-0.035em]">Under contract? Start with the closing date.</h2>
+              <p className="max-w-[560px] text-[17px] leading-normal text-white">
+                Name and number first, a few taps about the deal, then a call with a loan specialist. No documents and no credit pull to get started.
+              </p>
             </div>
             <ButtonLink href="/get-funding" variant="light" size="lg">
               {SITE.cta}

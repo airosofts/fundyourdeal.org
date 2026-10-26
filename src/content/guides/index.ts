@@ -1,7 +1,32 @@
 import type { Guide } from "../types";
+import bridgeLoanExitStrategies from "./bridge-loan-exit-strategies";
+import brrrrMethodStepByStep from "./brrrr-method-step-by-step";
+import cashNeededToFlipAHouse from "./cash-needed-to-flip-a-house";
+import closingAnInvestorLoanFast from "./closing-an-investor-loan-fast";
+import constructionDrawSchedule from "./construction-draw-schedule";
+import howHardMoneyLoansWork from "./how-hard-money-loans-work";
+import howToCalculateArv from "./how-to-calculate-arv";
+import investorLoanPointsAndFees from "./investor-loan-points-and-fees";
+import ltvVsLtcVsArv from "./ltv-vs-ltc-vs-arv";
+import refinanceAfterRehab from "./refinance-after-rehab";
+import rehabBudgetForLenders from "./rehab-budget-for-lenders";
+import rentalCashFlowBeforeYouBuy from "./rental-cash-flow-before-you-buy";
 
-// Guides are registered here as they're written (see docs/brand.md for the plan).
-export const GUIDES: Guide[] = [];
+// In the order of docs/brand.md's guide plan: flips, financing basics, BRRRR and rentals, construction.
+export const GUIDES: Guide[] = [
+  howToCalculateArv,
+  rehabBudgetForLenders,
+  cashNeededToFlipAHouse,
+  howHardMoneyLoansWork,
+  closingAnInvestorLoanFast,
+  bridgeLoanExitStrategies,
+  brrrrMethodStepByStep,
+  refinanceAfterRehab,
+  rentalCashFlowBeforeYouBuy,
+  constructionDrawSchedule,
+  ltvVsLtcVsArv,
+  investorLoanPointsAndFees,
+];
 
 export const guideBySlug = (slug: string) => GUIDES.find((g) => g.slug === slug);
 

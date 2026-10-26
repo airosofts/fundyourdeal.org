@@ -87,7 +87,7 @@ Every figure is from the lender's own program page unless noted; source codes at
 |---|---|---|
 | Rehab phase | Up to 95% LTC, 100% rehab, IO; 9 mo (LendingOne) / 13–24 mo (Lima One) | LO5; L3 |
 | Refi leverage | ~75% of ARV | LO5 |
-| Seasoning | Waived for in-house refi; otherwise 90 days, or capped at cost basis | L1, L3; RC1/C1; K1 |
+| Seasoning | Waived for in-house refi; otherwise 90 days. Roc caps a refi at 80% of total cost basis if owned under 3 months; Kiavi: cash-out after 90 days of ownership (both checked 2026-10-26) | L1, L3; RC1/C1; K1 |
 | Delayed purchase refi | Within 6 months | K3 |
 | Incentives | 0.5% rate discount; up to 50% off origination; +1 point if not refinanced in-house | LO5; L3 |
 
@@ -111,8 +111,8 @@ Every figure is from the lender's own program page unless noted; source codes at
 Note: MFL (third-party) reports Freddie Mac retired its SBL program 2026-04-15, replaced by "Conventional Small" ($2M–10M); unverified.
 
 ## 10. Rates
-DSCR: Griffin from 7.125% 30-yr fixed (2026-10-14, G1); TQL 7.00–7.375% at 800 FICO/75% LTV/1.00 DSCR/5-yr PPP (2026-10-19); Defy 6.25–7.875% grid (2026-09-21, D2); LendingOne 7–9% average investor, STR 7–10% (2026-09-22, LO7); HMDA 2025 median 30-yr investor 7.375% (HM). Advertised floors: Roc 5.39%, Easy Street 5.75%, RCN 6.00%, New Silver 6%, Kiavi 6.25%, Lima One 6.25%, Civic 6.56%.
-Fix & flip: HMDA 2025 short-term investor median 9.99%; non-bank 10.25% (IQR 9.5–11%); banks 7.5% (HM). Floors: Lima One 7.5% (live page, Oct 19; earlier 7.25%), Kiavi 8.25%, Roc 8.25%, Civic 8.49%, New Silver 8.5–11%, Easy Street 8.90%, RCN 9.24–10.74%. Bridge floors 8.25–8.49%; ground-up floors 8.99–9.84%.
+DSCR: Griffin from 7.125% 30-yr fixed (2026-10-14, G1); TQL 6.875–7.25% at 800 FICO/75% LTV/1.00 DSCR/5-yr PPP (2026-10-26; was 7.00–7.375% on 10-19); Defy best case 7.375% at 740+/75% LTV/1.0+ DSCR, no grid shown (2026-10-23; the 6.25–7.875% grid of 09-21 is gone, D2); LendingOne 7–9% average investor, STR 7–10% (2026-09-22, LO7); HMDA 2025 median 30-yr investor 7.375% (HM). Advertised floors: Roc 5.39%, Easy Street 5.75%, RCN 6.00%, New Silver 6%, Kiavi 6.375% (live page 2026-10-26; was 6.25%), Lima One 6.25%, Civic 6.56%.
+Fix & flip: HMDA 2025 short-term investor median 10%; non-bank 10.45% (IQR 9.75–11%); banks 7.5%; 66,029 loans, non-banks 83.3%, 91% IO, 95.1% balloon, 70.9% 12-month (HM, corrected 2026-10-26; the earlier 9.99% / 10.25% / 9.5–11% / 68,319 figures were withdrawn). Floors: Lima One 7.75% (live page, Oct 26; was 7.5% on Oct 19), Kiavi 8.25%, Roc 8.25%, Civic 8.49%, New Silver 8.5–11%, Easy Street 8.90%, RCN 9.24–10.74%. Bridge floors 8.25–8.49%; ground-up floors 8.99–9.84%.
 
 ## Source codes
 K1 kiavi.com/loans/dscr · K3 kiavi.com/loans/fix-and-flip · K4 kiavi.com/loans/bridge-loans · K5 kiavi.com/loans/new-construction-infill

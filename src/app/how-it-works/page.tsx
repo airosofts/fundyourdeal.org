@@ -2,255 +2,422 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { PageIntro } from "@/components/PageIntro";
-import { CompareTable, DefinitionSection, FaqSection, Sources, StepsBand } from "@/components/sections";
-import { ButtonLink, Container, Eyebrow, H2 } from "@/components/ui";
+import { CompareTable, FaqSection, Sources } from "@/components/sections";
+import { ButtonLink, Check, Container, Eyebrow, H2 } from "@/components/ui";
+import { OCCUPANCY_ANSWERS, OCCUPANCY_QUESTION, SHARE_CONSENT_TEXT, SUBMIT_LABEL, TCPA_CONSENT_TEXT } from "@/lib/consent";
+import { CREDIT, EXPERIENCE, LOAN_RANGES, LOAN_TYPES, PROPERTY_TYPES, PURPOSES } from "@/lib/leadSpec";
 import { SITE } from "@/lib/site";
 
 export const metadata: Metadata = {
-  title: { absolute: "How It Works: Investor Loans Funded Fast | Fund Your Deal" },
-  description: "How Fund Your Deal works: your details and a few quick taps in about 60 seconds, a call from a loan specialist, your terms in writing and a fast close.",
+  title: { absolute: "How It Works: From Contract to Closing | Fund Your Deal" },
+  description:
+    "Apply in about 60 seconds, no credit pull. Talk to a loan specialist, get terms in writing, then close. Published closing times and documents by loan type.",
   alternates: { canonical: "/how-it-works" },
 };
 
-// The lead form, in order (docs/lead-form.md, form v3).
-const WE_ASK: [string, string][] = [
-  ["Your name and number", "First and last name, mobile number and your OK to be called or texted. Email is optional. These come first so a loan specialist can reach you even if you stop partway."],
-  ["Investment property or not", "Will you or a family member live in the property? Our loans are for investment property only. If it’s a home you’ll live in, a residential mortgage is the right fit."],
-  ["What you’re financing", "A rental, a short-term rental, a fix and flip, a buy-rehab-rent deal, a bridge loan, a new build or several rentals."],
-  ["Buying or refinancing", "A purchase, a refinance or, on rental loans, a cash-out refinance."],
-  ["The property", "Single-family, 2–4 units, a condo or townhome, 5+ units, or land for a new build."],
-  ["How much you need", "One tap from five ranges, from under $150,000 to $1 million and up. The exact number comes on the call."],
-  ["Your credit, roughly", "Under 620, 620–675, 675–720 or 720+. A rough range is enough; the form never pulls your credit."],
-  ["Your experience", "Project loans only (flips, buy-rehab-rent, bridge and new builds): deals in the last 3 years, from none to 4 or more."],
-  ["Property ZIP code", "Five digits. Still shopping? Use the ZIP code where you plan to buy."],
+const labels = (list: readonly { label: string }[]) => list.map((o) => o.label);
+
+// The path at a glance; each item jumps to its section below.
+const PATH: { href: string; label: string; text: string }[] = [
+  { href: "#the-form", label: "Apply", text: "About 60 seconds. Contact details, then quick taps. No credit pull to apply." },
+  { href: "#after", label: "Talk", text: "A loan specialist phones or texts you to work through the deal." },
+  { href: "#after", label: "Terms", text: "Rate, leverage, points, fees and prepayment terms in writing, with the document list." },
+  { href: "#timelines", label: "Close", text: "Appraisal, underwriting and signing. Project loans then pay out the rehab in draws." },
 ];
 
-const AFTER: { title: string; text: ReactNode }[] = [
+// Screens 2–9 of the lead form (docs/lead-form.md). Options come straight from leadSpec, so this list can't drift from the form.
+const TAPS: { ask: string; why: string; options: readonly string[] }[] = [
   {
-    title: "A fast call back",
-    text: (
-      <>
-        A loan specialist calls to confirm the property address, the price or current value, the rent or lease and, for project loans, the rehab budget, the after-repair value
-        and your track record. Expect questions about your timeline and whether you’ll borrow in your own name or an LLC.
-      </>
-    ),
+    ask: OCCUPANCY_QUESTION,
+    why: "Fund Your Deal funds investment property only. Answering no confirms the loan is for a business purpose. A property you or a relative will occupy needs a residential mortgage lender instead.",
+    options: Object.values(OCCUPANCY_ANSWERS),
   },
+  { ask: "The kind of deal", why: "Picks the loan program, and with it the questions that follow.", options: labels(LOAN_TYPES) },
+  { ask: "Purchase or refinance", why: "Cash-out appears for rental loans only. Flips, BRRRR and new builds buy or refinance.", options: labels(PURPOSES) },
+  { ask: "The property type", why: "Land shows up only for new construction, and condos drop off that list.", options: labels(PROPERTY_TYPES) },
+  { ask: "How much funding the deal needs", why: "A range is enough here. You settle the exact amount with the loan specialist.", options: labels(LOAN_RANGES) },
+  { ask: "Your credit score, roughly", why: "You pick a band yourself. Nothing is pulled from a credit bureau.", options: CREDIT },
   {
-    title: "Your terms in writing",
-    text: (
-      <>
-        The rate, leverage, term, points and fees and the prepayment structure, in writing, with what’s needed to close. See <Link href="/rates#factors">what moves the rate</Link>,
-        and look up any term in the <Link href="/glossary">investor loan glossary</Link>.
-      </>
-    ),
+    ask: "Deals completed in the past 3 years",
+    why: "Project loans only: flips, BRRRR, bridge and new construction. Rental loans skip this screen. Track record moves leverage and rate on project loans.",
+    options: labels(EXPERIENCE),
   },
-  {
-    title: "Credit check and documents",
-    text: (
-      <>
-        We tell you before any credit check. Rental loans qualify on the property’s DSCR, the <Link href="/glossary#dscr">debt service coverage ratio</Link>: each month’s rent
-        divided by the property’s monthly payment, counting principal, interest, taxes, insurance and association dues (PITIA). So there are no tax returns or pay stubs to send, just
-        documents on the property, your cash and your entity.
-      </>
-    ),
-  },
-  {
-    title: "Appraisal and underwriting",
-    text: (
-      <>
-        The appraiser confirms value and, for rentals, market rent; for projects, the after-repair value. Underwriting checks title, insurance, the entity and the numbers against the
-        program’s limits. If the appraisal comes in low, the leverage can change, and your loan specialist walks you through the options.
-      </>
-    ),
-  },
-  {
-    title: "Close and get funded",
-    text: (
-      <>
-        Sign in your name or your LLC. Rental loans fund in full at closing. Project loans fund the purchase at closing and release the rehab or construction budget in{" "}
-        <Link href="/glossary#draws">draws</Link> as work is done.
-      </>
-    ),
-  },
+  { ask: "The property’s ZIP code", why: "Five digits. No address yet? Enter the ZIP code of the area you’re targeting.", options: [] },
 ];
 
-const DOCUMENTS: [string, string][] = [
-  ["DSCR rental loan", "Purchase contract or current mortgage statement, the lease if it’s rented, bank statements for the down payment and reserves, entity documents if you borrow in an LLC, and proof of insurance."],
-  ["Short-term rental", "The same, plus 12 months of booking history on a refinance. On a purchase, lenders work from a third-party income projection or long-term market rent."],
-  ["Cash-out refinance", "Current mortgage statement, the lease, the purchase settlement statement and receipts for any work you’ve done since you bought, which matter if you’ve owned it only a few months."],
-  ["Fix and flip or BRRRR", "Purchase contract, a rehab budget and scope of work, your track record if you have one, bank statements and entity documents."],
-  ["Bridge loan", "Purchase contract or payoff statement, bank statements and the exit plan: who refinances it, or how and when you’ll sell."],
-  ["Ground-up construction", "Lot details, plans, permit status, a construction budget and schedule, and your builder’s details and completed projects."],
-  ["Portfolio loan", "A schedule of every property with its rent, lease, current loan balance and value, plus entity documents."],
+const AFTER: { stage: string; happens: ReactNode; faster: ReactNode }[] = [
+  {
+    stage: "The call",
+    happens: (
+      <>
+        A loan specialist reaches you by phone or text at the mobile number from screen one. Expect questions on the address, the price or current value and the rent. On a rental, the rent and the expected
+        payment give you the DSCR (<Link href="/glossary#dscr">debt service coverage ratio</Link>): the property’s monthly rent divided by its total monthly payment. On a project, it’s
+        the rehab budget, the <Link href="/glossary#arv">after-repair value</Link> and your past deals. You’ll also cover your closing date and whose name goes on the loan: yours
+        or your LLC’s.
+      </>
+    ),
+    faster: <>Have the contract open. The closing date is often the number that decides it, because it sets which loan can close in time.</>,
+  },
+  {
+    stage: "Your terms, in writing",
+    happens: (
+      <>
+        The rate; the leverage, quoted as <Link href="/glossary#ltv">LTV</Link>, <Link href="/glossary#ltc">LTC</Link> or a share of after-repair value; the term;{" "}
+        <Link href="/glossary#points">points</Link> and lender fees; any prepayment terms; and the conditions to close, with the document list attached. See{" "}
+        <Link href="/rates">the rate ranges lenders have published</Link>.
+      </>
+    ),
+    faster: <>Read the leverage line first. It tells you how much cash you bring to the closing table.</>,
+  },
+  {
+    stage: "Credit, appraisal and underwriting",
+    happens: (
+      <>
+        You’re told before any credit check. The appraiser confirms the value, plus market rent on a rental or after-repair value on a project. The licensed lender then
+        underwrites the file: title, insurance, your entity, and whether the numbers fit the program. A low appraisal can change the leverage.
+      </>
+    ),
+    faster: <>Get the insurance quote and your LLC documents together while the appraisal is out, so the file is complete the day it comes back.</>,
+  },
+  {
+    stage: "Closing and funding",
+    happens: (
+      <>
+        You sign in your own name or your LLC’s. A rental loan funds in full at closing. A project loan funds the purchase at closing and pays out the rehab or build budget in{" "}
+        <Link href="/glossary#draws">draws</Link> after each inspection. Lima One published draw funding within 24 hours and Easy Street within 48 hours.
+      </>
+    ),
+    faster: <>Send each draw request with photos as soon as a stage is done. LendingOne published same-day virtual inspections.</>,
+  },
 ];
 
 const TIMELINE: string[][] = [
-  ["DSCR rental loan", "About 2–5 weeks: 14–21 days at Defy, an average of 34 days at Griffin", "The appraisal and its market-rent estimate"],
-  ["Fix and flip", "About 1–3 weeks: 7 days at Kiavi, 7–10 business days at LendingOne, 10 business days at RCN", "The appraisal with after-repair value, and the rehab budget review"],
-  ["Bridge loan", "7–14 business days (Kiavi, LendingOne)", "The appraisal and the exit review"],
+  [
+    "Fix and flip or hard money",
+    "7 days (Kiavi); 7–10 business days (LendingOne); 10 business days (RCN Capital)",
+    "The appraisal’s after-repair value and the lender’s review of your rehab budget",
+  ],
+  ["Bridge", "7–14 business days (Kiavi, LendingOne)", "Appraisal, title and a check that the sale or refinance exit holds up"],
+  ["DSCR rental", "14–21 days (Defy); 30 days (Easy Street); 34-day average (Griffin)", "The appraisal, which has to estimate market rent as well as value"],
+  [
+    "BRRRR",
+    "Two closings: the rehab loan on a fix and flip timeline, then a rental refinance on the DSCR timeline",
+    "Seasoning before the refinance: 90 days at some lenders, waived at others when they refinance their own rehab loan",
+  ],
+  [
+    "Ground-up construction",
+    "Not published by Kiavi, LendingOne or Lima One (checked October 26, 2026)",
+    "Plans, permits and the budget review. After closing, draws fund in as little as 24 hours (Lima One) or 2 days (LendingOne)",
+  ],
+];
+
+const READY: { loan: string; items: string[]; note: ReactNode }[] = [
+  {
+    loan: "Fix and flip or hard money",
+    items: [
+      "Signed purchase contract showing the closing date",
+      "Line-item rehab budget and scope of work",
+      "Comparable sales that back up your after-repair value",
+      "Past deals, if any: address, buy and sell price, dates",
+      "Bank statements covering the down payment and closing costs",
+      "LLC documents, if you’re borrowing in an entity",
+    ],
+    note: <>Lenders such as Kiavi, Lima One and RCN Capital published 100% rehab financing, but draws are paid after inspection, so you front each stage.</>,
+  },
+  {
+    loan: "BRRRR",
+    items: ["Everything on the flip list", "The rent you expect once it’s finished, with rental comps", "Your refinance plan: which loan, and roughly when"],
+    note: (
+      <>
+        Seasoning rules decide when you can refinance out. Some lenders want about 90 days; others waive it when they refinance their own rehab loan. The{" "}
+        <Link href="/calculators/brrrr">BRRRR calculator</Link> shows what comes back.
+      </>
+    ),
+  },
+  {
+    loan: "Bridge",
+    items: ["Purchase contract, or a payoff statement if you’re refinancing", "Proof of the cash or equity going in", "A written exit: list price and timing for a sale, or the loan you’ll refinance into"],
+    note: (
+      <>
+        Published terms run 12 to 24 months (Roc Capital, Lima One, Kiavi), so the <Link href="/glossary#exit-strategy">exit</Link> has to fit inside them.
+      </>
+    ),
+  },
+  {
+    loan: "Ground-up construction",
+    items: ["Lot contract or deed", "Plans and permit status", "Construction budget and draw schedule", "Your builder’s contract and details", "A list of your completed builds"],
+    note: <>Permits change the money: Roc Capital and Civic published land advances of up to 75%, or 60% on an unpermitted lot.</>,
+  },
+  {
+    loan: "Rental purchase or refinance",
+    items: [
+      "Purchase contract, or the current mortgage statement",
+      "Signed leases, or a market-rent estimate if it’s vacant",
+      "Bank statements for the down payment and reserves",
+      "A landlord insurance quote and your LLC documents",
+      "Short-term rental: 12 months of bookings on a refinance, or an income projection such as AirDNA on a purchase",
+    ],
+    note: (
+      <>
+        Lenders count the lower of the lease and market rent. Published reserve rules ran from none (Kiavi) to 3 months of <Link href="/glossary#pitia">PITIA</Link> (Defy) and 3–9
+        months (Easy Street).
+      </>
+    ),
+  },
+  {
+    loan: "Cash-out refinance or portfolio",
+    items: [
+      "The settlement statement from your purchase",
+      "Receipts for work done since you bought",
+      "Current mortgage statements and leases",
+      "Portfolio: a schedule of every property with value, loan balance, rent and lease status",
+    ],
+    note: <>Kiavi, LendingOne and Lima One typically ask for roughly 90 days on title before they’ll do a cash-out. On portfolios, Roc Capital and Civic look for at least 90% of units leased.</>,
+  },
 ];
 
 const FAQ = [
   {
-    q: "How fast will someone call me?",
-    a: "Fast. A loan specialist reaches out as soon as your request comes in during business hours, by phone or text at the number you gave. Have the property address, the price or value, and the rent or rehab numbers handy, and the first call can get you most of the way to written terms.",
+    q: "Does applying affect my credit score?",
+    a: "No. Applying never touches your credit report; you just pick a rough range on the form. A credit check comes later, before a loan can be approved, because your score still moves leverage and rate even when the property carries the loan. You’re told before that check happens, so nothing lands on your report by surprise.",
   },
   {
-    q: "Do you pull my credit?",
-    a: "Not to apply. The form asks for a rough credit range and never touches your credit report. Before a loan is approved, the lender does check credit, because your score affects leverage and rate even when the property qualifies on its rent. We tell you before any credit check happens.",
+    q: "My closing is 10 days away. Can a loan close that fast?",
+    a: "Sometimes, depending on the loan. In October 2026, Kiavi published 7-day closings on fix and flip loans, and Kiavi and LendingOne published 7–14 business days on bridge loans. Rental loans run longer; Defy published 14–21 days. Give the loan specialist your date on the first call and send documents the day they’re asked for. No closing date is guaranteed.",
   },
   {
-    q: "Why does the form ask for my phone number first?",
-    a: "So a loan specialist can reach you even if you don’t finish every question. Your name, mobile number and consent to a call or text come first; email is optional. The quick taps after that, covering the property, the amount, your credit range and the ZIP code, take seconds and let the specialist come to the call prepared.",
+    q: "What happens if I stop partway through the form?",
+    a: `Your request is saved as soon as you press “${SUBMIT_LABEL}” on the first screen, so a loan specialist can still reach you at the number you gave. The taps after that only help the specialist prepare. Anything you skipped gets covered on the call instead.`,
   },
   {
-    q: "What documents will I need?",
-    a: "Nothing to start. Once you move forward, expect the purchase contract or current mortgage statement, recent bank statements, leases for rentals, a rehab budget and scope of work for flips, plans and a budget for new builds, and LLC documents if you borrow in an entity. Rental loans that qualify on the property’s rent don’t need tax returns or pay stubs.",
+    q: "Why does the form ask whether I’ll live in the property?",
+    a: "Because Fund Your Deal funds investment property only, and the answer decides whether a business-purpose loan fits at all. If you or a family member will live there, including one side of a duplex or one apartment in a fourplex, the loan should come from a residential mortgage lender. Answering that it’s an investment property confirms the business purpose.",
   },
   {
-    q: "Can I apply before I have a property under contract?",
-    a: "Yes. Applying while you shop tells you your budget and lets you move fast when you find the deal. Pick the property type you’re after, your best estimate of the amount and the ZIP code where you plan to buy. Final terms depend on the actual property and its appraisal, so expect them once you have an address.",
+    q: "Does the experience question decide whether I qualify?",
+    a: "Not on its own. It only appears for flips, BRRRR, bridge and construction loans, and it mostly shapes leverage and pricing. RCN Capital, for example, treats 3 rehabs in 3 years as experienced, while Roc Capital and Civic published no experience minimum for flips in October 2026. New construction is the exception: lenders usually want at least one completed build.",
   },
   {
-    q: "Do I need an LLC to apply?",
-    a: "No. You can apply as an individual and decide later. Investor lenders lend to LLCs, and some require one at closing, usually with a personal guarantee from the owners. Whether to set one up, and how, is a legal and tax question for your attorney or CPA.",
+    q: "What do the written terms include?",
+    a: "The rate, the leverage as a share of the price, cost or after-repair value, the term, points and lender fees, any prepayment terms or extension options, and the conditions to close, with the document list. Start with the leverage line, since it sets how much cash you bring. Nothing commits you until you sign the loan documents.",
   },
   {
-    q: "What if I’m not sure which loan I need?",
-    a: "Pick the closest option, or describe your plan on the call. Holding and renting long-term usually means a DSCR loan. Renovating and selling means fix and flip. Renovating, renting and then refinancing is BRRRR. Buying fast and refinancing later is a bridge loan. Your loan specialist confirms the fit before you get terms.",
+    q: "Do I need an LLC before I apply?",
+    a: "No. You can apply in your own name and decide later. Some rental lenders, including Lima One, Roc Capital and Civic, require an LLC by closing, and lenders such as Griffin pair the LLC with a personal guarantee. Whether to form one, and where, is a question for your attorney or CPA.",
   },
   {
-    q: "How long does it take to close an investor loan?",
-    a: "It depends on the program. Lenders publish about one to three weeks for fix and flip loans, 7–14 business days for bridge loans and about two to five weeks for DSCR rental loans, where the appraisal takes longest. Sending documents quickly and lining up insurance early are the two things that most shorten your own timeline.",
+    q: "Can I apply before I have a signed contract?",
+    a: "Yes. Applying early gives you a working budget, so you can write offers knowing roughly how a loan would be sized. Use the ZIP code of the area you’re buying in and your best guess at the amount. Final terms wait for a real address, because the appraisal and the property itself drive them.",
   },
   {
-    q: "Is the rate on your website the rate I’ll get?",
-    a: "No. The rates page shows published market ranges with dates, so you can see where investor rates sit. Your rate depends on your credit, leverage, the property’s rent coverage or your experience, the prepayment structure and any points, and it comes in writing after the call.",
-  },
-  {
-    q: "Why do you only lend on investment property?",
-    a: "Investment property loans are business loans, with their own rules and underwriting, and that’s all we do. The property has to be one that neither you nor a family member will live in. If you plan to live there, a residential mortgage lender is the right fit.",
+    q: "What slows a closing down the most?",
+    a: "Usually the appraisal, and then whatever is still missing from the file: an insurance binder, entity documents, a rehab budget the lender can follow, or a title problem. You can’t hurry the appraiser, but you can have everything else ready before the report comes back. The deal-ready lists on this page show what each loan needs.",
   },
 ];
 
 const SOURCES = [
-  { label: "Defy Mortgage — DSCR loans", url: "https://defymortgage.com/non-qm-loans/dscr-loans/" },
-  { label: "Griffin Funding — DSCR loans", url: "https://griffinfunding.com/non-qm-mortgages/dscr-loans/" },
   { label: "Kiavi — Fix and flip loans", url: "https://www.kiavi.com/loans/fix-and-flip" },
   { label: "Kiavi — Bridge loans", url: "https://www.kiavi.com/loans/bridge-loans" },
+  { label: "Kiavi — DSCR rental loans", url: "https://www.kiavi.com/loans/dscr" },
   { label: "LendingOne — Fix and flip loans", url: "https://lendingone.com/loan-types/fix-and-flip-loans/" },
   { label: "LendingOne — Bridge loans", url: "https://lendingone.com/loan-types/bridge-loans/" },
+  { label: "LendingOne — Rental loans", url: "https://lendingone.com/rental-loans/" },
+  { label: "LendingOne — New construction loans (fetched October 26, 2026)", url: "https://lendingone.com/loan-types/new-construction-loans/" },
   { label: "RCN Capital — Loan programs", url: "https://www.rcncapital.com/loan-programs" },
+  { label: "Defy Mortgage — DSCR loans", url: "https://defymortgage.com/non-qm-loans/dscr-loans/" },
+  { label: "Griffin Funding — DSCR loans", url: "https://griffinfunding.com/non-qm-mortgages/dscr-loans/" },
+  { label: "Easy Street Capital — EasyRent", url: "https://easystreetcap.com/easyrent" },
+  { label: "Easy Street Capital — EasyFix", url: "https://easystreetcap.com/easyfix/" },
+  { label: "Easy Street Capital — Short-term rental financing", url: "https://easystreetcap.com/short-term-rental-financing/" },
+  { label: "Lima One Capital — Fix and flip", url: "https://www.limaone.com/hard-money-fix-n-flip/" },
+  { label: "Lima One Capital — Bridge loans", url: "https://www.limaone.com/bridge-loans/" },
+  { label: "Lima One Capital — Rental loans", url: "https://www.limaone.com/rental/" },
+  { label: "Lima One Capital — Short-term rental loans", url: "https://www.limaone.com/short-term-rental-loans/" },
+  { label: "Lima One Capital — New construction loans (fetched October 26, 2026)", url: "https://www.limaone.com/new-construction-loans/" },
+  { label: "Kiavi — New construction (fetched October 26, 2026)", url: "https://www.kiavi.com/loans/new-construction-infill" },
+  { label: "Roc Capital — Fix and flip", url: "https://roccapital.com/fix-and-flip" },
+  { label: "Roc Capital — Ground-up construction", url: "https://roccapital.com/ground-up" },
+  { label: "Roc Capital — Stabilized bridge", url: "https://roccapital.com/stabilized-bridge" },
+  { label: "Roc Capital — Single-property rentals", url: "https://roccapital.com/single-property-rentals" },
+  { label: "Roc Capital — Rental portfolios", url: "https://roccapital.com/rental-portfolios" },
+  { label: "Civic Financial Services — Fix and flip", url: "https://civicfs.com/fix-and-flip/" },
+  { label: "Civic Financial Services — Ground-up construction", url: "https://civicfs.com/ground-up-construction-loan/" },
+  { label: "Civic Financial Services — Rental loans", url: "https://civicfs.com/rental/" },
+  { label: "Civic Financial Services — Rental portfolio loans", url: "https://civicfs.com/rental-portfolio-loan/" },
 ];
 
 export default function Page() {
   return (
     <>
-      <PageIntro crumbs={[{ href: "/", label: "Home" }, { label: "How it works" }]} eyebrow="Fast funding for investors" title="From first question to funded — fast.">
+      <PageIntro crumbs={[{ href: "/", label: "Home" }, { label: "How it works" }]} eyebrow="How it works" title="From signed contract to funded loan, step by step.">
         <p>
-          Here’s how it works at {SITE.name}: start with your name and number, answer a few quick taps about the deal, and you’re done in about 60 seconds with no credit pull.
-          Then a loan specialist calls, you get your terms in writing and you close fast. Investment property only.
+          Applying takes about 60 seconds, and there’s no credit pull to apply: you type your name and mobile number, then tap through a handful of questions about the deal. After that, a loan specialist
+          calls, your terms arrive in writing, and the file moves to closing. Investment property only.
         </p>
       </PageIntro>
 
-      <StepsBand
-        eyebrow="Four steps"
-        heading="How you get funded."
-        items={[
-          { title: "Tell us who you are, then about the deal", text: "Name, mobile number and email if you like, then a few quick taps: loan type, amount, credit range, ZIP. About 60 seconds, no credit pull." },
-          { title: "Talk to a loan specialist", text: "A loan specialist calls back fast to walk through the property, your numbers and your deadline." },
-          { title: "Get your terms", text: "Rate, leverage, fees and prepayment terms in writing, so you can lock in the deal and move." },
-          { title: "Close and get funded", text: "Lenders publish one to three weeks for most short-term loans and two to five weeks for rental loans, mostly waiting on the appraisal." },
-        ]}
-      />
+      <Container className="pb-12 pt-2">
+        <ol className="grid gap-3 [grid-template-columns:repeat(auto-fit,minmax(min(100%,230px),1fr))]">
+          {PATH.map((p, i) => (
+            <li key={p.label}>
+              <a href={p.href} className="flex h-full flex-col gap-1.5 rounded-2xl border border-line bg-white p-5 transition-colors hover:border-ink">
+                <span className="font-mono text-xs uppercase tracking-[0.08em] text-brand">
+                  {String(i + 1).padStart(2, "0")} · {p.label}
+                </span>
+                <span className="text-[15px] leading-relaxed text-ink-2">{p.text}</span>
+              </a>
+            </li>
+          ))}
+        </ol>
+      </Container>
 
-      <section className="bg-white">
-        <Container className="grid items-start gap-12 py-[88px] lg:grid-cols-[minmax(0,1fr)_minmax(0,2fr)]">
-          <div className="flex flex-col gap-3.5">
-            <Eyebrow>What we ask</Eyebrow>
-            <H2>Your details first, then a few quick taps.</H2>
+      <section id="the-form" className="scroll-mt-20 border-t border-line bg-white">
+        <Container className="grid items-start gap-12 py-[80px] lg:grid-cols-[minmax(0,2fr)_minmax(0,3fr)]">
+          <div className="flex flex-col gap-4 lg:sticky lg:top-24">
+            <Eyebrow>Part 1 · The form</Eyebrow>
+            <H2>Contact details first. Then a few quick taps and a ZIP code.</H2>
             <p className="text-[17px] leading-relaxed text-ink-2">
-              Investor lenders care more about the property than your paycheck, so that’s what the questions cover. It isn’t a long application: no income, no
-              documents and no Social Security number to start.
+              The first screen is where the typing happens; after it, you tap answers and finish with a five-digit ZIP code. Press “{SUBMIT_LABEL}” on that first screen and
+              your request is saved, so if your phone rings halfway through, a loan specialist can still reach you.
             </p>
-            <p className="text-[15px] leading-relaxed text-ink-2">Starting from a loan program’s page? The form skips the questions that page already answers.</p>
+            <p className="text-[15px] leading-relaxed text-ink-2">
+              Coming from a program page? The questions that page already answers, such as the kind of deal, are filled in and skipped.
+            </p>
+            <div>
+              <ButtonLink href="/get-funding" size="lg">
+                {SITE.cta}
+              </ButtonLink>
+            </div>
           </div>
-          <dl className="flex flex-col text-[15px]">
-            {WE_ASK.map(([k, v]) => (
-              <div key={k} className="grid gap-1 border-t border-line py-4 last:border-b sm:grid-cols-[220px_1fr] sm:gap-6">
-                <dt className="font-semibold">{k}</dt>
-                <dd className="leading-relaxed text-ink-2">{v}</dd>
-              </div>
-            ))}
-          </dl>
-        </Container>
-      </section>
 
-      <section className="border-t border-line">
-        <Container className="flex flex-col gap-10 py-[88px]">
-          <div className="flex max-w-[680px] flex-col gap-3">
-            <Eyebrow>After you submit</Eyebrow>
-            <H2>What happens between the form and the closing table.</H2>
-          </div>
-          <ol className="grid gap-x-8 gap-y-2 [grid-template-columns:repeat(auto-fit,minmax(min(100%,340px),1fr))]">
-            {AFTER.map((s, i) => (
-              <li key={s.title} className="grid grid-cols-[44px_1fr] gap-3 border-t border-line py-5">
-                <span className="font-mono text-[15px] text-muted">{String(i + 1).padStart(2, "0")}</span>
-                <div>
-                  <div className="text-[17px] font-semibold">{s.title}</div>
-                  <p className="mt-1 text-[15px] leading-relaxed text-ink-2 [&_a]:text-brand [&_a]:underline [&_a]:underline-offset-2">{s.text}</p>
-                </div>
+          <ol className="flex flex-col gap-4">
+            <li className="rounded-2xl border border-ink p-6">
+              <div className="font-mono text-xs uppercase tracking-[0.08em] text-brand">Screen 01 · Your details</div>
+              <ul className="mt-3 grid gap-2 text-[15px] sm:grid-cols-2">
+                {["First and last name", "Mobile phone number", "Email (optional)", "Call and text consent (required)"].map((f) => (
+                  <li key={f} className="flex items-center gap-2.5">
+                    <Check />
+                    {f}
+                  </li>
+                ))}
+              </ul>
+              <details className="mt-4 text-sm leading-relaxed text-ink-2">
+                <summary className="cursor-pointer font-semibold text-ink">Read the exact consent wording</summary>
+                <p className="mt-2">{TCPA_CONSENT_TEXT}</p>
+                <p className="mt-2">{SHARE_CONSENT_TEXT}</p>
+              </details>
+            </li>
+            {TAPS.map((t, i) => (
+              <li key={t.ask} className="rounded-2xl border border-line bg-paper p-6">
+                <div className="font-mono text-xs uppercase tracking-[0.08em] text-muted">Screen {String(i + 2).padStart(2, "0")}</div>
+                <div className="mt-1.5 text-[17px] font-semibold">{t.ask}</div>
+                <p className="mt-1 text-[15px] leading-relaxed text-ink-2">{t.why}</p>
+                {t.options.length > 0 && (
+                  <ul className="mt-3 flex flex-wrap gap-2" aria-label="Answer choices">
+                    {t.options.map((o) => (
+                      <li key={o} className="rounded-lg border border-line bg-white px-3 py-1.5 text-sm">
+                        {o}
+                      </li>
+                    ))}
+                  </ul>
+                )}
               </li>
             ))}
           </ol>
         </Container>
       </section>
 
-      <DefinitionSection
-        eyebrow="Documents"
-        heading="What you’ll send, by loan type."
-        intro="Nothing is needed to apply. These are the documents lenders typically ask for once you move forward. Have them ready and you take days off the closing."
-        rows={DOCUMENTS}
-      />
-
-      <section className="border-t border-line">
-        <Container className="flex flex-col gap-8 py-[88px]">
+      <section id="after" className="scroll-mt-20 border-t border-line">
+        <Container className="flex flex-col gap-10 py-[80px]">
           <div className="flex max-w-[720px] flex-col gap-3">
-            <Eyebrow>Timeline</Eyebrow>
-            <H2>How long closing takes.</H2>
-            <p className="text-[17px] leading-relaxed text-ink-2">
-              Published closing times from lenders’ own program pages, October 2026. Short-term loans move fastest because they’re sized on the deal; rental loans wait on an
-              appraisal that also has to estimate market rent.
-            </p>
+            <Eyebrow>Part 2 · After you submit</Eyebrow>
+            <H2>The call, your terms, then the closing table.</H2>
           </div>
-          <CompareTable columns={["Loan", "Published closing times", "What takes the longest"]} rows={TIMELINE} highlight={-1} />
+          <div className="overflow-hidden rounded-2xl border border-line bg-white">
+            <div className="hidden grid-cols-[200px_minmax(0,1.7fr)_minmax(0,1fr)] gap-6 bg-paper px-6 py-3 font-mono text-xs uppercase tracking-[0.06em] text-muted md:grid">
+              <span>Stage</span>
+              <span>What happens</span>
+              <span>Move it faster</span>
+            </div>
+            <ol>
+              {AFTER.map((s, i) => (
+                <li key={s.stage} className="grid gap-3 border-t border-line px-6 py-6 first:border-t-0 md:grid-cols-[200px_minmax(0,1.7fr)_minmax(0,1fr)] md:gap-6 md:first:border-t">
+                  <span className="text-[17px] font-semibold">
+                    <span className="mr-2 font-mono text-[15px] font-normal text-brand">{String(i + 1).padStart(2, "0")}</span>
+                    {s.stage}
+                  </span>
+                  <p className="text-[15px] leading-relaxed text-ink-2 [&_a]:text-brand [&_a]:underline [&_a]:underline-offset-2">{s.happens}</p>
+                  <p className="rounded-xl bg-paper p-4 text-[15px] leading-relaxed text-ink-2 [&_a]:text-brand [&_a]:underline [&_a]:underline-offset-2">
+                    <span className="mb-1 block font-mono text-xs uppercase tracking-[0.06em] text-muted md:hidden">Move it faster</span>
+                    {s.faster}
+                  </p>
+                </li>
+              ))}
+            </ol>
+          </div>
         </Container>
       </section>
 
-      <FaqSection heading="How-it-works questions" items={FAQ}>
-        <p className="text-[15px] text-ink-2">
-          Ready?{" "}
-          <Link href="/get-funding" className="font-semibold underline underline-offset-4">
-            Get your deal funded
-          </Link>{" "}
-          — or read the{" "}
-          <Link href="/disclosures" className="font-semibold underline underline-offset-4">
-            disclosures
-          </Link>
-          .
-        </p>
-      </FaqSection>
+      <section id="timelines" className="scroll-mt-20 border-t border-line bg-white">
+        <Container className="flex flex-col gap-8 py-[80px]">
+          <div className="flex max-w-[760px] flex-col gap-3">
+            <Eyebrow>Closing timelines</Eyebrow>
+            <H2>How fast each loan type can close.</H2>
+            <p className="text-[17px] leading-relaxed text-ink-2">
+              These closing times come from each lender’s program page, pulled in October 2026. They show what a lender says it can do, not a promise for your file.
+            </p>
+          </div>
+          <CompareTable columns={["Loan", "Published closing time", "What usually sets the pace"]} rows={TIMELINE} highlight={1} />
+          <p className="max-w-[760px] text-[15px] leading-relaxed text-ink-2">
+            Short-term rental, cash-out refinance and portfolio loans are sized on rent the way DSCR loans are. Our October 2026 research found no separate published closing times for
+            them. For the full picture, read <Link href="/guides/closing-an-investor-loan-fast" className="text-brand underline underline-offset-2">what sets an investor loan’s closing timeline</Link>.
+          </p>
+        </Container>
+      </section>
+
+      <section id="deal-ready" className="scroll-mt-20 border-t border-line">
+        <Container className="flex flex-col gap-10 py-[80px]">
+          <div className="flex max-w-[760px] flex-col gap-3">
+            <Eyebrow>Part 3 · Be deal-ready</Eyebrow>
+            <H2>The file each loan needs, so nothing waits on you.</H2>
+            <p className="text-[17px] leading-relaxed text-ink-2">
+              None of this is needed to apply. Pull it together before the call, and the document request won’t be what holds up your closing date.
+            </p>
+          </div>
+          <div className="grid gap-4 [grid-template-columns:repeat(auto-fit,minmax(min(100%,330px),1fr))]">
+            {READY.map((r) => (
+              <div key={r.loan} className="flex flex-col gap-4 rounded-2xl border border-line bg-white p-6">
+                <h3 className="text-[19px] font-semibold tracking-[-0.01em]">{r.loan}</h3>
+                <ul className="flex flex-col gap-2 text-[15px] leading-relaxed text-ink-2">
+                  {r.items.map((it) => (
+                    <li key={it} className="flex gap-2.5">
+                      <Check className="mt-1.5 text-brand" />
+                      <span>{it}</span>
+                    </li>
+                  ))}
+                </ul>
+                <p className="mt-auto border-t border-line pt-4 text-sm leading-relaxed text-muted [&_a]:text-brand [&_a]:underline [&_a]:underline-offset-2">{r.note}</p>
+              </div>
+            ))}
+          </div>
+        </Container>
+      </section>
+
+      <FaqSection heading="Questions about the process" items={FAQ} />
 
       <Container className="pb-[72px]">
         <div className="flex flex-wrap items-center justify-between gap-7 rounded-3xl bg-brand p-[clamp(32px,5vw,64px)] text-white">
-          <h2 className="max-w-[560px] text-[clamp(28px,3.2vw,40px)] font-semibold leading-[1.1] tracking-[-0.03em]">Get your deal funded fast.</h2>
+          <div className="flex max-w-[560px] flex-col gap-3">
+            <h2 className="text-[clamp(28px,3.2vw,40px)] font-semibold leading-[1.1] tracking-[-0.03em]">Your closing date isn’t moving. Start now.</h2>
+            <p className="text-[17px] leading-relaxed text-white">About 60 seconds, no credit pull to apply.</p>
+          </div>
           <ButtonLink href="/get-funding" variant="light" size="lg">
             {SITE.cta}
           </ButtonLink>
         </div>
       </Container>
 
-      <Sources sources={SOURCES} updated="2026-10-23" />
+      <Sources sources={SOURCES} updated="2026-10-26" />
     </>
   );
 }
