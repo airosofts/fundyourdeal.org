@@ -1,0 +1,51 @@
+@import "tailwindcss";
+
+/* Design tokens — one place to restyle the whole site. */
+@theme inline {
+  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, monospace;
+
+  --color-paper: #f5f6f2; /* page ground */
+  --color-ink: #0d1411; /* text, dark sections */
+  --color-ink-2: #3c4642; /* secondary text */
+  --color-muted: #5d6862; /* captions (4.5:1 on paper) */
+  --color-line: #dce0da;
+  --color-line-2: #e7eae5;
+  --color-field: #c9cfc8; /* input borders */
+  --color-brand: #1e5e46; /* actions */
+  --color-brand-deep: #174a37;
+  --color-brand-tint: #e6f0e9;
+  --color-lime: #cdeb6e; /* highlight on dark */
+  --color-night: #131c18;
+  --color-night-line: #26302b;
+  --color-mist: #b7c0ba; /* secondary text on dark */
+  --color-mist-2: #98a39c;
+  --color-warn: #9a2b1b;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+body {
+  background: var(--color-paper);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+:focus-visible {
+  outline: 2px solid var(--color-brand);
+  outline-offset: 2px;
+}
+details > summary {
+  list-style: none;
+  cursor: pointer;
+}
+details > summary::-webkit-details-marker {
+  display: none;
+}
+details[open] .faq-plus {
+  transform: rotate(45deg);
+}
+input[type="number"]::-webkit-inner-spin-button {
+  opacity: 0.4;
+}
