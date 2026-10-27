@@ -25,8 +25,7 @@ export default function Page() {
       </PageIntro>
       <Prose>
         <p>
-          These terms apply when you use {SITE.domain}, the website of {SITE.name} (“we”, “us”). By using the site, or by sending a loan request with the “{SUBMIT_LABEL}” button,
-          you accept them.
+          These terms apply when you use {SITE.domain}, the website of {SITE.name} (“we”, “us”). By using the site, or by pressing “{SUBMIT_LABEL}” on the first screen of the loan request form, you accept them.
         </p>
 
         <h2>1. Who can use the site</h2>

@@ -195,8 +195,12 @@ export function LeadForm({ variant = "card", preset }: { variant?: "card" | "pag
   const canGoBack = at > screens.indexOf("occupancy");
   const back = () => show(at - 1);
 
-  const heading = (text: string) => (
-    <h2 ref={headingRef} tabIndex={-1} className="scroll-mt-24 text-[clamp(24px,2.6vw,32px)] font-semibold leading-[1.12] tracking-[-0.03em] outline-none">
+  const heading = (text: string, hidden = false) => (
+    <h2
+      ref={headingRef}
+      tabIndex={-1}
+      className={hidden ? "sr-only" : "scroll-mt-24 text-[clamp(24px,2.6vw,32px)] font-semibold leading-[1.12] tracking-[-0.03em] outline-none"}
+    >
       {text}
     </h2>
   );
@@ -209,6 +213,14 @@ export function LeadForm({ variant = "card", preset }: { variant?: "card" | "pag
 
   const submitClass = "min-h-[56px] rounded-full bg-brand px-8 text-[17px] font-bold text-white hover:bg-brand-deep disabled:opacity-60";
   const progress = done ? 1 : (at + 1) / (screens.length + 1);
+
+  // Owner-occupants aren't turned away (the portal tags them), but they should know where these loans stop.
+  const ownerNote = a.occupancy === "owner" && (
+    <p role="note" className="rounded-xl border border-brand bg-brand-tint px-4 py-3 text-[15px] leading-relaxed text-ink">
+      <b className="font-semibold">Heads up:</b> DSCR and hard money loans are for investment property only, not a home you or your family will live in. You can keep going, and your
+      specialist will talk you through what fits.
+    </p>
+  );
 
   let body: ReactNode;
   if (done) {
@@ -253,10 +265,8 @@ export function LeadForm({ variant = "card", preset }: { variant?: "card" | "pag
             <input tabIndex={-1} autoComplete="off" value={honeypot} onChange={(e) => setHoneypot(e.target.value)} />
           </label>
         </div>
-        <div className="flex flex-col gap-2.5">
-          <div className="font-mono text-[13px] uppercase tracking-[0.06em] text-brand">Deal funding · about a minute</div>
-          {heading("Who should we call about this deal?")}
-        </div>
+        {/* Just the fields, then Next (Roland, Oct 28). The heading stays for screen readers. */}
+        {heading("Your contact details", true)}
         <div className="grid gap-4 sm:grid-cols-2">
           <TextField id={`${uid}-first`} label="First name" autoComplete="given-name" value={a.first} onChange={(v) => setA({ ...a, first: v })} error={errors.first} />
           <TextField id={`${uid}-last`} label="Last name" autoComplete="family-name" value={a.last} onChange={(v) => setA({ ...a, last: v })} error={errors.last} />
@@ -264,7 +274,7 @@ export function LeadForm({ variant = "card", preset }: { variant?: "card" | "pag
           <TextField id={`${uid}-phone`} label="Mobile number" type="tel" inputMode="tel" autoComplete="tel-national" placeholder="(555) 555-0100" mono value={a.phone} onChange={(v) => setA({ ...a, phone: phoneMask(v) })} error={errors.phone} />
         </div>
         <div className="flex flex-col gap-2">
-          <label htmlFor={`${uid}-tcpa`} className={`grid cursor-pointer grid-cols-[24px_1fr] items-start gap-3 rounded-xl border bg-white p-4 text-sm leading-relaxed text-ink-2 ${errors.tcpa ? "border-warn" : "border-field"}`}>
+          <label htmlFor={`${uid}-tcpa`} className={`grid cursor-pointer grid-cols-[22px_1fr] items-start gap-3 rounded-xl border bg-white p-3.5 text-[13px] leading-snug text-ink-2 ${errors.tcpa ? "border-warn" : "border-field"}`}>
             <input id={`${uid}-tcpa`} type="checkbox" checked={a.tcpa} onChange={(e) => setA({ ...a, tcpa: e.target.checked })} className="mt-0.5 size-[22px] accent-brand" aria-invalid={!!errors.tcpa} aria-describedby={errors.tcpa ? `${uid}-tcpa-err` : undefined} />
             <span>{TCPA_CONSENT_TEXT}</span>
           </label>
@@ -302,6 +312,7 @@ export function LeadForm({ variant = "card", preset }: { variant?: "card" | "pag
         }}
         className="flex flex-col gap-5"
       >
+        {ownerNote}
         {heading("Final question: where's the deal?")}
         <div className="sm:max-w-[260px]">
           <TextField id={`${uid}-zip`} label="ZIP code of the property" inputMode="numeric" autoComplete="off" placeholder="30310" mono value={a.zip} onChange={(v) => setA({ ...a, zip: v.replace(/\D/g, "").slice(0, 5) })} error={errors.zip} />
@@ -321,6 +332,7 @@ export function LeadForm({ variant = "card", preset }: { variant?: "card" | "pag
     body = (
       <div className="flex flex-col gap-5">
         {s === "occupancy" && a.first.trim() && <p className="-mb-2 text-[15px] font-medium text-brand">Got it, {a.first.trim()}. Now the deal itself, one tap per answer, so your specialist calls with the numbers in hand.</p>}
+        {ownerNote}
         {heading(QUESTION[s])}
         <fieldset className="grid gap-2.5 sm:grid-cols-2">
           <legend className="sr-only">{QUESTION[s]}</legend>
@@ -329,7 +341,16 @@ export function LeadForm({ variant = "card", preset }: { variant?: "card" | "pag
               key={o.value}
               className="flex min-h-[60px] cursor-pointer flex-col justify-center rounded-xl border border-field bg-white px-4 py-3 transition-colors has-[:checked]:border-2 has-[:checked]:border-brand has-[:checked]:bg-brand-tint has-[:focus-visible]:outline has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-brand hover:border-ink"
             >
-              <input type="radio" name={`${uid}-${s}`} value={o.value} checked={value === o.value} onChange={() => pick(s, o.value)} className="sr-only" />
+              <input
+                type="radio"
+                name={`${uid}-${s}`}
+                value={o.value}
+                checked={value === o.value}
+                onChange={() => pick(s, o.value)}
+                // After Back, the earlier answer is already checked, so tapping it again fires no change event. Move on anyway.
+                onClick={() => value === o.value && pick(s, o.value)}
+                className="sr-only"
+              />
               <span className="text-[16px] font-semibold">{o.label}</span>
               {o.hint && <span className="mt-0.5 font-mono text-[11px] uppercase tracking-[0.06em] text-muted">{o.hint}</span>}
             </label>
@@ -337,7 +358,9 @@ export function LeadForm({ variant = "card", preset }: { variant?: "card" | "pag
         </fieldset>
         <div className="flex items-center justify-between gap-3 border-t border-line pt-4">
           {canGoBack ? <BackButton onClick={back} /> : <span />}
-          <span className="font-mono text-xs text-muted">One tap moves you on</span>
+          <button type="button" disabled={!value} onClick={() => advance(at, a)} className="min-h-11 rounded-full bg-brand px-6 text-[15px] font-bold text-white hover:bg-brand-deep disabled:bg-line disabled:text-muted">
+            Next
+          </button>
         </div>
       </div>
     );
@@ -345,7 +368,7 @@ export function LeadForm({ variant = "card", preset }: { variant?: "card" | "pag
 
   const card = (
     <div className="flex flex-col gap-5">
-      {!done && (
+      {!done && screen !== "contact" && (
         <div className="flex flex-col gap-2">
           <div className="flex justify-between font-mono text-[12px] text-ink-2">
             <span>{`STEP ${at + 1} OF ${screens.length}`}</span>

@@ -48,9 +48,10 @@ export const propertyTypesFor = (t: LoanType | "") => (t === "construction" ? PR
 
 // Broad bands, so the amount is a tap rather than a typed figure.
 export const LOAN_RANGES = [
-  { id: "lt150", label: "Under $150K", min: 0, max: 150_000 },
-  { id: "150_300", label: "$150K to $300K", min: 150_000, max: 300_000 },
-  { id: "300_500", label: "$300K to $500K", min: 300_000, max: 500_000 },
+  // Roland's ranges (Oct 28). $100K–$150K wasn't in his list; it's folded into the second band until he confirms.
+  { id: "lt100", label: "Under $100K", min: 0, max: 100_000 },
+  { id: "100_250", label: "$100K to $250K", min: 100_000, max: 250_000 },
+  { id: "250_500", label: "$250K to $500K", min: 250_000, max: 500_000 },
   { id: "500_1m", label: "$500K to $1M", min: 500_000, max: 1_000_000 },
   { id: "1m_plus", label: "$1M or more", min: 1_000_000, max: null },
 ] as const;
@@ -82,7 +83,7 @@ export const FORM_VERSION = 3;
 // Each lead stores the consent wording it saw plus a version tag. Edit a text in consent.ts, bump its tag here.
 // Oct 26: Fund Your Deal's own wording for all three texts.
 export const BUSINESS_PURPOSE_VERSION = "fyd-occupancy-2026-10-26";
-export const SHARE_CONSENT_VERSION = "fyd-terms-2026-10-26";
+export const SHARE_CONSENT_VERSION = "fyd-terms-2026-10-28"; // button renamed "Next"
 export const TCPA_CONSENT_VERSION = "fyd-tcpa-2026-10-26";
 
 export type Answers = {

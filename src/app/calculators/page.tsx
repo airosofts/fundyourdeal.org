@@ -100,15 +100,14 @@ export default function Page() {
           itemListElement: CARDS.map((c, i) => ({ "@type": "ListItem", position: i + 1, name: c.title, url: SITE.url + c.href })),
         }}
       />
+      {/* Calculators first, explanations at the bottom: less to scroll past on a phone (Roland, Oct 28). */}
       <PageIntro crumbs={[{ href: "/", label: "Home" }, { label: "Calculators" }]} title={TITLE}>
-        <p className="[&_a]:text-brand [&_a]:underline [&_a]:underline-offset-2">
-          <Inline text={INTRO} />
-        </p>
+        <p>Four free calculators for the deal in front of you. No sign-up, no email.</p>
       </PageIntro>
       <Container className="pb-[88px] pt-4">
         <div className="grid gap-px overflow-hidden rounded-2xl border border-line bg-line [grid-template-columns:repeat(auto-fit,minmax(min(100%,270px),1fr))]">
           {CARDS.map((c) => (
-            <Link key={c.href} href={c.href} className="group flex min-h-[240px] flex-col gap-3 bg-white p-7 transition-colors hover:bg-paper">
+            <Link key={c.href} href={c.href} className="group flex flex-col gap-3 bg-white p-6 transition-colors hover:bg-paper sm:min-h-[240px] sm:p-7">
               <span className="flex items-baseline justify-between gap-3">
                 <span className="font-mono text-[30px] text-brand" aria-hidden="true">
                   {c.sym}
@@ -117,7 +116,7 @@ export default function Page() {
               </span>
               <span className="text-[21px] font-semibold tracking-[-0.02em]">{c.title}</span>
               <span className="text-[16px] font-semibold leading-snug text-ink">{c.question}</span>
-              <span className="text-[15px] leading-relaxed text-ink-2">{c.text}</span>
+              <span className="hidden text-[15px] leading-relaxed text-ink-2 sm:block">{c.text}</span>
               <span className="mt-auto pt-2 text-sm font-semibold">
                 Run the numbers <span className="inline-block transition-transform group-hover:translate-x-0.5">→</span>
               </span>
@@ -131,6 +130,9 @@ export default function Page() {
           <div className="flex max-w-[720px] flex-col gap-3">
             <Eyebrow>Which one, when</Eyebrow>
             <H2>Match the calculator to where the deal is.</H2>
+            <p className="text-[17px] leading-relaxed text-ink-2 [&_a]:text-brand [&_a]:underline [&_a]:underline-offset-2">
+              <Inline text={INTRO} />
+            </p>
             <p className="text-[17px] leading-relaxed text-ink-2">Most rehab deals pass through three of the four. Find the row for the stage you&apos;re at.</p>
           </div>
           <CompareTable columns={["Where the deal is", "Run", "The question", "What to look at"]} rows={STAGES} />

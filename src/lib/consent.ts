@@ -7,7 +7,7 @@ import { SITE } from "./site";
 // Reword a text here and bump its tag there in the same change.
 // [COUNSEL TO REVIEW BEFORE LAUNCH]
 
-export const SUBMIT_LABEL = "Fund My Deal";
+export const SUBMIT_LABEL = "Next"; // the first screen's button (Roland, Oct 28: just the fields, then Next)
 
 /** Step 2. "No" is the business-purpose certification. A "Yes" is saved too, and the portal marks it disqualified. */
 export const OCCUPANCY_QUESTION = "Will you, or anyone in your family, live in this property?";

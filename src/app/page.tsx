@@ -548,18 +548,20 @@ export default function Home() {
       {/* Hero. Phones: headline, then the form, then the rest. Desktop: form on the right, above the fold. */}
       <section className="border-b border-line">
         <Container className="grid items-start gap-x-14 gap-y-7 pb-16 pt-8 sm:pt-12 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,1fr)] lg:grid-rows-[auto_1fr] lg:pt-16">
+          {/* Phones: a short headline so the form starts high on the screen (Roland, Oct 28). */}
           <div className="flex flex-col gap-4 lg:col-start-1 lg:row-start-1 lg:pt-4">
-            <Eyebrow>Flip · Bridge · BRRRR · New build · Rental refinance</Eyebrow>
-            <h1 className="text-[clamp(38px,5vw,64px)] font-semibold leading-[1.03] tracking-[-0.04em]">Got a deal? Get it funded before your closing date.</h1>
+            <div className="hidden lg:block">
+              <Eyebrow>Flip · Bridge · BRRRR · New build · Rental refinance</Eyebrow>
+            </div>
+            <h1 className="text-[clamp(34px,5vw,64px)] font-semibold leading-[1.03] tracking-[-0.04em]">Fast funding for real estate.</h1>
           </div>
-          <div id="start" className="scroll-mt-24 lg:col-start-2 lg:row-span-2 lg:row-start-1">
+          <div id="start" className="flex scroll-mt-24 flex-col gap-3 lg:col-start-2 lg:row-span-2 lg:row-start-1">
             <LeadForm variant="card" />
+            <p className="text-center font-mono text-xs uppercase tracking-[0.08em] text-muted">Investment property only</p>
           </div>
           <div className="flex flex-col gap-7 lg:col-start-1 lg:row-start-2">
             <p className="max-w-[36em] text-[18px] leading-relaxed text-ink-2">
-              {SITE.name} is for real estate investors with a deal in hand: fix and flip, hard money, bridge, BRRRR and ground-up construction loans, plus the rental loan you
-              refinance into once the work is done. Start with your name and number, answer a few taps, and a loan specialist calls you to talk through what this deal
-              needs.
+              Flip, bridge, BRRRR, new build or rental refinance: leave your number, tap through a few questions, and a loan specialist calls you about the deal.
             </p>
             <div className="flex flex-col gap-3">
               <p className="font-mono text-xs uppercase tracking-[0.08em] text-muted">Four numbers to have ready for the call</p>
@@ -572,10 +574,6 @@ export default function Home() {
                 ))}
               </dl>
             </div>
-            <p className="max-w-[36em] border-l-2 border-brand pl-4 text-[15px] leading-relaxed text-ink-2">
-              <b className="font-semibold text-ink">Investment property only.</b> Every loan here is business-purpose credit for a property you&apos;ll sell or rent out, not a home loan. If you or your family
-              will live there, a residential mortgage lender is the place to go. Applying never pulls your credit.
-            </p>
           </div>
         </Container>
       </section>
