@@ -11,21 +11,33 @@ import ltvVsLtcVsArv from "./ltv-vs-ltc-vs-arv";
 import refinanceAfterRehab from "./refinance-after-rehab";
 import rehabBudgetForLenders from "./rehab-budget-for-lenders";
 import rentalCashFlowBeforeYouBuy from "./rental-cash-flow-before-you-buy";
+import fixAndFlipLoanRates from "./fix-and-flip-loan-rates";
+import gapFundingForRealEstateDeals from "./gap-funding-for-real-estate-deals";
+import bridgeLoanRequirements from "./bridge-loan-requirements";
+import specHomeConstructionLoans from "./spec-home-construction-loans";
+import proofOfFundsForRealEstateInvestors from "./proof-of-funds-for-real-estate-investors";
+import hardMoneyLoanRequirements from "./hard-money-loan-requirements";
 
 // In the order of docs/brand.md's guide plan: flips, financing basics, BRRRR and rentals, construction.
 export const GUIDES: Guide[] = [
   howToCalculateArv,
   rehabBudgetForLenders,
   cashNeededToFlipAHouse,
+  hardMoneyLoanRequirements,
+  fixAndFlipLoanRates,
   howHardMoneyLoansWork,
   closingAnInvestorLoanFast,
+  bridgeLoanRequirements,
   bridgeLoanExitStrategies,
   brrrrMethodStepByStep,
   refinanceAfterRehab,
   rentalCashFlowBeforeYouBuy,
   constructionDrawSchedule,
+  specHomeConstructionLoans,
   ltvVsLtcVsArv,
   investorLoanPointsAndFees,
+  gapFundingForRealEstateDeals,
+  proofOfFundsForRealEstateInvestors,
 ];
 
 export const guideBySlug = (slug: string) => GUIDES.find((g) => g.slug === slug);
