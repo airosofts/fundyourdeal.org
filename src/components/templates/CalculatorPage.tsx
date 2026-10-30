@@ -4,6 +4,7 @@ import { PageIntro } from "../PageIntro";
 import { CompareTable, ExampleCard, FaqSection, Formula, RelatedPrograms, Sources } from "../sections";
 import { Check, Container, Eyebrow, H2, JsonLd } from "../ui";
 import { SITE } from "@/lib/site";
+import { ORG_ID } from "@/lib/seo";
 import type { Source } from "@/content/types";
 
 /** Long-form content blocks for calculator pages. Text supports **bold** and [label](/href). */
@@ -263,8 +264,12 @@ export function CalculatorPage({
           url: SITE.url + path,
           applicationCategory: "FinanceApplication",
           operatingSystem: "Web",
+          browserRequirements: "Requires JavaScript",
+          isAccessibleForFree: true,
+          inLanguage: "en-US",
+          ...(updated ? { dateModified: updated } : {}),
           offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
-          publisher: { "@id": `${SITE.url}/#org` },
+          publisher: { "@id": ORG_ID },
         }}
       />
       <PageIntro crumbs={[{ href: "/", label: "Home" }, { href: "/calculators", label: "Calculators" }, { label: crumb }]} title={title}>

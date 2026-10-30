@@ -1,18 +1,12 @@
 import type { ReactNode } from "react";
 import { Breadcrumbs, Container, Eyebrow, JsonLd } from "./ui";
-import { SITE } from "@/lib/site";
+import { breadcrumbLd } from "@/lib/seo";
 
 /** Page heading: breadcrumbs (+ BreadcrumbList schema), eyebrow, H1, an orange rule, intro. */
 export function PageIntro({ crumbs, eyebrow, title, children, aside }: { crumbs: { href?: string; label: string }[]; eyebrow?: string; title: string; children?: ReactNode; aside?: ReactNode }) {
   return (
     <section>
-      <JsonLd
-        data={{
-          "@context": "https://schema.org",
-          "@type": "BreadcrumbList",
-          itemListElement: crumbs.map((c, i) => ({ "@type": "ListItem", position: i + 1, name: c.label, ...(c.href ? { item: SITE.url + c.href } : {}) })),
-        }}
-      />
+      <JsonLd data={breadcrumbLd(crumbs)} />
       <Container className="flex flex-wrap items-end justify-between gap-6 pb-8 pt-10 sm:pt-14">
         <div className="flex min-w-0 max-w-[780px] flex-col gap-4">
           <Breadcrumbs items={crumbs} />

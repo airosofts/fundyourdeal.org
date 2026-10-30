@@ -69,7 +69,7 @@
 - **Wording to use instead:**
   - "No credit pull to get matched" rather than "no credit check".
   - For DSCR, "No W-2s or tax returns — qualifies on rental income" rather than "no income verification".
-- **Reg B:** Gable may be a "creditor" under 1002.2(l) because it regularly refers applicants. Never discourage applicants on a prohibited basis. Asking about citizenship or residency is permitted (1002.6(b)(7)).
+- **Reg B:** Fund Your Deal may be a "creditor" under 1002.2(l) because it regularly refers applicants. Never discourage applicants on a prohibited basis. Asking about citizenship or residency is permitted (1002.6(b)(7)).
 
 ## Form field findings (lenders' live forms)
 - **Kiavi:**

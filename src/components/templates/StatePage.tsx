@@ -3,6 +3,7 @@ import { PageIntro } from "../PageIntro";
 import { ApplySection, AudienceGrid, CompareTable, DealSheet, DefinitionList, ExampleCard, FaqSection, RelatedPrograms, Sources, SpeedLine, dealCopy, formatDate } from "../sections";
 import { ButtonLink, Container, Eyebrow, H2, JsonLd } from "../ui";
 import { SITE, programBySlug } from "@/lib/site";
+import { ORG_ID, WEBSITE_ID, alternatesFor, openGraphFor } from "@/lib/seo";
 import type { StateContent } from "@/content/types";
 
 export const statePath = (s: Pick<StateContent, "program" | "slug">) => `${programBySlug(s.program)!.href}/${s.slug}`;
@@ -11,8 +12,8 @@ export function stateMetadata(s: StateContent): Metadata {
   return {
     title: { absolute: s.metaTitle },
     description: s.metaDescription,
-    alternates: { canonical: statePath(s) },
-    openGraph: { title: s.metaTitle, description: s.metaDescription, url: statePath(s), type: "article" },
+    alternates: alternatesFor(statePath(s)),
+    openGraph: openGraphFor({ title: s.metaTitle, description: s.metaDescription, url: statePath(s), type: "website" }),
   };
 }
 
@@ -40,11 +41,14 @@ export function StatePage({ s }: { s: StateContent }) {
         data={{
           "@context": "https://schema.org",
           "@type": "WebPage",
+          "@id": SITE.url + statePath(s),
           name: s.metaTitle,
           description: s.metaDescription,
           url: SITE.url + statePath(s),
           dateModified: s.updated,
-          about: { "@type": "Service", serviceType: p.title, provider: { "@id": `${SITE.url}/#org` }, areaServed: { "@type": "State", name: s.state } },
+          inLanguage: "en-US",
+          isPartOf: { "@id": WEBSITE_ID },
+          about: { "@type": "Service", name: `${p.title} in ${s.state}`, serviceType: p.title, provider: { "@id": ORG_ID }, areaServed: { "@type": "State", name: s.state } },
         }}
       />
       <PageIntro
@@ -69,7 +73,7 @@ export function StatePage({ s }: { s: StateContent }) {
             {d.cta}
           </ButtonLink>
           <ButtonLink href={p.href} variant="outline" size="lg">
-            {p.short} nationwide
+            All about {p.short}
           </ButtonLink>
         </div>
         <SpeedLine />

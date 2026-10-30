@@ -4,12 +4,13 @@ import { PageIntro } from "@/components/PageIntro";
 import { ContactForm } from "@/components/forms";
 import { ButtonLink, Container, Eyebrow } from "@/components/ui";
 import { SITE } from "@/lib/site";
+import { alternatesFor } from "@/lib/seo";
 
 export const metadata: Metadata = {
   title: { absolute: "Contact Fund Your Deal" },
   description:
     "Message or email Fund Your Deal. Need a deal funded? The 60-second funding request reaches a loan specialist faster, with no credit pull to apply.",
-  alternates: { canonical: "/contact" },
+  alternates: alternatesFor("/contact"),
 };
 
 export default function Page() {

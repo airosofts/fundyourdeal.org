@@ -1,11 +1,12 @@
 import type { Metadata } from "next";
 import { DscrCalculator } from "@/components/DscrCalculator";
 import { CalculatorPage } from "@/components/templates/CalculatorPage";
+import { alternatesFor } from "@/lib/seo";
 
 export const metadata: Metadata = {
   title: { absolute: "DSCR Calculator: Rent, Payment and Max Loan | Fund Your Deal" },
   description: "DSCR (debt service coverage ratio) calculator: rent ÷ PITIA the way lenders run it, the largest loan your rent supports, and how to lift a thin ratio.",
-  alternates: { canonical: "/calculators/dscr" },
+  alternates: alternatesFor("/calculators/dscr"),
 };
 
 export default function Page() {

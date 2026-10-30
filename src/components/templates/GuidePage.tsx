@@ -4,6 +4,7 @@ import { Fragment, type ReactNode } from "react";
 import { Breadcrumbs, Container, JsonLd } from "../ui";
 import { ApplySection, CompareTable, FaqSection, Formula, RelatedPrograms, Sources, dealCopy, formatDate } from "../sections";
 import { SITE, programBySlug } from "@/lib/site";
+import { OG_IMAGE, ORG_REF, WEBSITE_ID, alternatesFor, breadcrumbLd, openGraphFor } from "@/lib/seo";
 import type { Guide, GuideBlock } from "@/content/types";
 
 export const guidePath = (g: Pick<Guide, "slug" | "path">) => g.path ?? `/guides/${g.slug}`;
@@ -12,8 +13,16 @@ export function guideMetadata(g: Guide): Metadata {
   return {
     title: { absolute: g.metaTitle },
     description: g.metaDescription,
-    alternates: { canonical: guidePath(g) },
-    openGraph: { title: g.metaTitle, description: g.metaDescription, url: guidePath(g), type: "article", publishedTime: g.published, modifiedTime: g.updated },
+    alternates: alternatesFor(guidePath(g)),
+    openGraph: openGraphFor({
+      title: g.metaTitle,
+      description: g.metaDescription,
+      url: guidePath(g),
+      type: "article",
+      publishedTime: g.published,
+      modifiedTime: g.updated,
+      section: g.category,
+    }),
   };
 }
 
@@ -157,26 +166,27 @@ export function GuidePage({ g, crumbs, related }: { g: Guide; crumbs: { href?: s
 
   return (
     <>
+      {/* The byline credits the team, so author and publisher are both the Organization from layout.tsx. */}
       <JsonLd
         data={{
           "@context": "https://schema.org",
           "@type": "Article",
+          "@id": `${url}#article`,
           headline: g.title,
           description: g.metaDescription,
+          url,
+          mainEntityOfPage: { "@type": "WebPage", "@id": url },
+          isPartOf: { "@id": WEBSITE_ID },
           datePublished: g.published,
           dateModified: g.updated,
-          mainEntityOfPage: url,
-          author: { "@type": "Organization", name: `${SITE.name} lending team`, url: `${SITE.url}/about` },
-          publisher: { "@id": `${SITE.url}/#org` },
+          image: SITE.url + OG_IMAGE.url,
+          articleSection: g.category,
+          inLanguage: "en-US",
+          author: ORG_REF,
+          publisher: ORG_REF,
         }}
       />
-      <JsonLd
-        data={{
-          "@context": "https://schema.org",
-          "@type": "BreadcrumbList",
-          itemListElement: crumbs.map((c, i) => ({ "@type": "ListItem", position: i + 1, name: c.label, ...(c.href ? { item: SITE.url + c.href } : {}) })),
-        }}
-      />
+      <JsonLd data={breadcrumbLd(crumbs)} />
 
       <header className="border-b border-line">
         <Container className="flex flex-col gap-5 pb-10 pt-12">

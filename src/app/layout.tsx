@@ -5,6 +5,7 @@ import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { JsonLd } from "@/components/ui";
 import { SITE } from "@/lib/site";
+import { DESCRIPTION, FEED_TYPES, OG_SITE, ORG_ID, WEBSITE_ID } from "@/lib/seo";
 import { Analytics } from "@/components/Analytics";
 import "./globals.css";
 
@@ -15,12 +16,23 @@ const mono = JetBrains_Mono({ variable: "--font-geist-mono", subsets: ["latin"] 
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE.url),
+  applicationName: SITE.name,
   title: { default: `${SITE.name} — Fast Fix and Flip, Bridge and BRRRR Loans`, template: `%s | ${SITE.name}` },
   description:
     "Deal under contract? Get fast funding for flips, hard money, bridge, BRRRR and new builds, then a rental loan sized on the rent when you refinance out.",
-  openGraph: { siteName: SITE.name, type: "website", locale: "en_US" },
+  // No title, description or url here: Next fills og:title and og:description from each page's own
+  // metadata, and a url set here would be inherited by every page. The image is opengraph-image.tsx.
+  // A page that sets its own openGraph replaces this object, so it goes through openGraphFor() (lib/seo.ts).
+  openGraph: { ...OG_SITE, type: "website" },
+  // Title, description and image are copied from openGraph.
+  twitter: { card: "summary_large_image" },
+  // Every page sets its own canonical through alternatesFor() or alternates.canonical. A page's
+  // alternates replace these, so alternatesFor() carries the feed link too.
+  alternates: { types: FEED_TYPES },
   // Off until launch: NEXT_PUBLIC_INDEXABLE=true on the live domain lets search engines in.
-  robots: SITE.indexable ? { index: true, follow: true } : { index: false, follow: false },
+  robots: SITE.indexable
+    ? { index: true, follow: true, googleBot: { index: true, follow: true, "max-image-preview": "large", "max-snippet": -1, "max-video-preview": -1 } }
+    : { index: false, follow: false },
 };
 
 // Matches the navy header so the phone browser bar runs into it.
@@ -30,12 +42,23 @@ export default function RootLayout({ children }: Readonly<{ children: ReactNode 
   return (
     <html lang="en" className={`${sans.variable} ${mono.variable} h-full`}>
       <body className="flex min-h-full flex-col">
+        {/* Site-wide nodes. Pages point at them by @id; no rating, entity name or licence number belongs here. */}
         <JsonLd
           data={{
             "@context": "https://schema.org",
             "@graph": [
-              { "@type": "Organization", "@id": `${SITE.url}/#org`, name: SITE.name, url: SITE.url, logo: `${SITE.url}/icon.svg`, description: SITE.tagline, email: SITE.email },
-              { "@type": "WebSite", "@id": `${SITE.url}/#website`, name: SITE.name, url: SITE.url, publisher: { "@id": `${SITE.url}/#org` } },
+              {
+                "@type": "Organization",
+                "@id": ORG_ID,
+                name: SITE.name,
+                url: SITE.url,
+                logo: { "@type": "ImageObject", url: `${SITE.url}/apple-icon`, width: 180, height: 180 },
+                description: DESCRIPTION,
+                email: SITE.email,
+                areaServed: "US",
+                contactPoint: { "@type": "ContactPoint", contactType: "customer service", email: SITE.email, url: `${SITE.url}/contact`, availableLanguage: "English" },
+              },
+              { "@type": "WebSite", "@id": WEBSITE_ID, name: SITE.name, url: SITE.url, description: DESCRIPTION, inLanguage: "en-US", publisher: { "@id": ORG_ID } },
             ],
           }}
         />

@@ -5,6 +5,7 @@ import { PageIntro } from "@/components/PageIntro";
 import { ExampleCard, FaqSection, Formula, Sources } from "@/components/sections";
 import { ButtonLink, Container, Eyebrow, H2, JsonLd } from "@/components/ui";
 import { SITE } from "@/lib/site";
+import { alternatesFor, openGraphFor } from "@/lib/seo";
 
 const META_TITLE = "Investor Loan Glossary: DSCR, ARV, Draws | Fund Your Deal";
 const META_DESCRIPTION =
@@ -13,8 +14,8 @@ const META_DESCRIPTION =
 export const metadata: Metadata = {
   title: { absolute: META_TITLE },
   description: META_DESCRIPTION,
-  alternates: { canonical: "/glossary" },
-  openGraph: { title: META_TITLE, description: META_DESCRIPTION, url: "/glossary", type: "article" },
+  alternates: alternatesFor("/glossary"),
+  openGraph: openGraphFor({ title: META_TITLE, description: META_DESCRIPTION, url: "/glossary", type: "article" }),
 };
 
 const UPDATED = "2026-10-26";

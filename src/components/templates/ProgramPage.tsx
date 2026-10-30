@@ -19,6 +19,7 @@ import {
 } from "../sections";
 import { ButtonLink, Container, Eyebrow, H2, JsonLd } from "../ui";
 import { SITE, programBySlug } from "@/lib/site";
+import { ORG_ID, WEBSITE_ID, alternatesFor, openGraphFor } from "@/lib/seo";
 import type { ProgramContent } from "@/content/types";
 
 export function programMetadata(c: ProgramContent): Metadata {
@@ -26,8 +27,8 @@ export function programMetadata(c: ProgramContent): Metadata {
   return {
     title: { absolute: c.metaTitle },
     description: c.metaDescription,
-    alternates: { canonical: p.href },
-    openGraph: { title: c.metaTitle, description: c.metaDescription, url: p.href, type: "article" },
+    alternates: alternatesFor(p.href),
+    openGraph: openGraphFor({ title: c.metaTitle, description: c.metaDescription, url: p.href, type: "website" }),
   };
 }
 
@@ -46,12 +47,14 @@ export function ProgramPage({ c, children }: { c: ProgramContent; children?: Rea
         data={{
           "@context": "https://schema.org",
           "@type": "WebPage",
+          "@id": SITE.url + p.href,
           name: c.metaTitle,
           description: c.metaDescription,
           url: SITE.url + p.href,
           dateModified: c.updated,
-          isPartOf: { "@id": `${SITE.url}/#website` },
-          about: { "@type": "Service", serviceType: p.title, provider: { "@id": `${SITE.url}/#org` }, areaServed: "US" },
+          inLanguage: "en-US",
+          isPartOf: { "@id": WEBSITE_ID },
+          about: { "@type": "Service", name: p.title, serviceType: p.title, description: p.blurb, provider: { "@id": ORG_ID }, areaServed: "US" },
         }}
       />
       <PageIntro

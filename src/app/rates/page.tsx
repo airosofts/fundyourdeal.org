@@ -6,11 +6,12 @@ import { RatesTable } from "@/components/RatesTable";
 import { CompareTable, DefinitionSection, FaqSection, Formula, Sources } from "@/components/sections";
 import { ButtonLink, Container, Eyebrow, H2 } from "@/components/ui";
 import { RATES_AS_OF, RATE_ROWS, RATE_SOURCES } from "@/lib/rates";
+import { alternatesFor } from "@/lib/seo";
 
 export const metadata: Metadata = {
   title: { absolute: `Investor Loan Rates for ${RATES_AS_OF} | Fund Your Deal` },
   description: "Investor loan rates for flips, bridge, construction and rentals from published lender pricing, what moves your rate, and what a point costs in dollars.",
-  alternates: { canonical: "/rates" },
+  alternates: alternatesFor("/rates"),
 };
 
 const A = "text-brand underline underline-offset-2";

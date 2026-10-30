@@ -1,11 +1,12 @@
 import type { Metadata } from "next";
 import { BrrrrCalculator } from "@/components/BrrrrCalculator";
 import { CalculatorPage } from "@/components/templates/CalculatorPage";
+import { alternatesFor } from "@/lib/seo";
 
 export const metadata: Metadata = {
   title: { absolute: "BRRRR Calculator: Cash Out at the Refinance | Fund Your Deal" },
   description: "Model both BRRRR loans: the rehab loan you buy with and the DSCR refinance that pays it off. See cash in, cash back, cash left in and if rent qualifies.",
-  alternates: { canonical: "/calculators/brrrr" },
+  alternates: alternatesFor("/calculators/brrrr"),
 };
 
 export default function Page() {

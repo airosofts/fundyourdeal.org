@@ -1,6 +1,6 @@
-// Flags text copied from the Gable Funding site: any run of 9 words in the
+// Flags text copied from the Greenspan Lending site: any run of 9 words in the
 // given files' prose (string literals and JSX text) that also appears in
-// Gable's source. Usage: node scripts/check-overlap.mjs <file> [file…]
+// Greenspan's source. Usage: node scripts/check-overlap.mjs <file> [file…]
 // Set GABLE_SRC to point somewhere else. Exit code 1 when anything matches.
 import fs from "node:fs";
 import path from "node:path";
@@ -60,7 +60,7 @@ for (const t of targets) {
   const hits = [];
   for (const k of shingles(prose(fs.readFileSync(t, "utf8"))).keys()) if (gable.has(k)) hits.push([k, gable.get(k)]);
   total += hits.length;
-  console.log(`${t}: ${hits.length ? `${hits.length} overlapping 9-word run(s)` : "no overlap with Gable"}`);
+  console.log(`${t}: ${hits.length ? `${hits.length} overlapping 9-word run(s)` : "no overlap with Greenspan"}`);
   for (const [k, src] of hits.slice(0, 40)) console.log(`   "${k}"  ← gable ${src}`);
   if (hits.length > 40) console.log(`   …and ${hits.length - 40} more`);
 }

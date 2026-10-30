@@ -7,12 +7,13 @@ import { ButtonLink, Check, Container, Eyebrow, H2 } from "@/components/ui";
 import { OCCUPANCY_ANSWERS, OCCUPANCY_QUESTION, SHARE_CONSENT_TEXT, SUBMIT_LABEL, TCPA_CONSENT_TEXT } from "@/lib/consent";
 import { CREDIT, EXPERIENCE, LOAN_RANGES, LOAN_TYPES, PROPERTY_TYPES, PURPOSES } from "@/lib/leadSpec";
 import { SITE } from "@/lib/site";
+import { alternatesFor } from "@/lib/seo";
 
 export const metadata: Metadata = {
   title: { absolute: "How It Works: From Contract to Closing | Fund Your Deal" },
   description:
     "Apply in about 60 seconds, no credit pull. Talk to a loan specialist, get terms in writing, then close. Published closing times and documents by loan type.",
-  alternates: { canonical: "/how-it-works" },
+  alternates: alternatesFor("/how-it-works"),
 };
 
 const labels = (list: readonly { label: string }[]) => list.map((o) => o.label);

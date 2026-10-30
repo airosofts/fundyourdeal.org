@@ -4,6 +4,7 @@ import { PageIntro } from "@/components/PageIntro";
 import { Prose, Todo } from "@/components/Prose";
 import { SUBMIT_LABEL } from "@/lib/consent";
 import { SITE } from "@/lib/site";
+import { alternatesFor } from "@/lib/seo";
 
 const UPDATED = "October 26, 2026";
 
@@ -11,7 +12,7 @@ export const metadata: Metadata = {
   title: "Privacy Policy",
   description:
     "How Fund Your Deal collects, uses, shares and keeps what you enter on our loan request form, plus cookies, analytics and the privacy choices you have.",
-  alternates: { canonical: "/privacy" },
+  alternates: alternatesFor("/privacy"),
 };
 
 export default function Page() {
@@ -35,7 +36,7 @@ export default function Page() {
         <h2>Who this policy covers</h2>
         <p>
           This policy covers {SITE.name} (“we”, “us”) and the website at {SITE.domain}. It explains what we collect when you use the site, what we do with it and what you can
-          control. We fund business-purpose loans on investment (non-owner-occupied) real estate.
+          control. We get investors funded on business-purpose loans for investment (non-owner-occupied) real estate.
         </p>
 
         <h2>What our loan request form collects, in order</h2>

@@ -5,11 +5,12 @@ import { CompareTable, FaqSection } from "@/components/sections";
 import { Inline } from "@/components/templates/CalculatorPage";
 import { ButtonLink, Container, Eyebrow, H2, JsonLd } from "@/components/ui";
 import { SITE } from "@/lib/site";
+import { alternatesFor } from "@/lib/seo";
 
 export const metadata: Metadata = {
   title: { absolute: "Fix and Flip, BRRRR and DSCR Calculators | Fund Your Deal" },
   description: "Run the deal before you sign: free fix and flip, BRRRR, DSCR and rental cash flow calculators that size the loan the way lenders do. No email needed.",
-  alternates: { canonical: "/calculators" },
+  alternates: alternatesFor("/calculators"),
 };
 
 const TITLE = "Deal calculators: run the numbers before you sign";
@@ -96,7 +97,7 @@ export default function Page() {
         data={{
           "@context": "https://schema.org",
           "@type": "ItemList",
-          name: "Fund Your Deal calculators",
+          name: `${SITE.name} calculators`,
           itemListElement: CARDS.map((c, i) => ({ "@type": "ListItem", position: i + 1, name: c.title, url: SITE.url + c.href })),
         }}
       />

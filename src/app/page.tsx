@@ -6,6 +6,7 @@ import { LeadForm } from "@/components/LeadForm";
 import { ExampleCard, Formula } from "@/components/sections";
 import { ButtonLink, Check, Container, Eyebrow, H2 } from "@/components/ui";
 import { SITE } from "@/lib/site";
+import { alternatesFor } from "@/lib/seo";
 
 // Fund Your Deal homepage, deal-first. Every market figure is a published lender term from
 // docs/research/loan-terms-2026-10.md (pulled 2026-10-19); the source codes in the comments
@@ -17,7 +18,7 @@ export const metadata: Metadata = {
   title: { absolute: `Investor Loans for Flips, Bridge and BRRRR | ${SITE.name}` },
   description:
     "Fix and flip, bridge, BRRRR and new-build loans for real estate investors, plus the rental refinance out. See what your deal needs and how fast it closes.",
-  alternates: { canonical: "/" },
+  alternates: alternatesFor("/"),
 };
 
 /* ------------------------------------------------------------------ */

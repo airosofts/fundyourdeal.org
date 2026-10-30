@@ -5,11 +5,12 @@ import { PageIntro } from "@/components/PageIntro";
 import { CompareTable, ExampleCard, FaqSection, Sources } from "@/components/sections";
 import { ButtonLink, Container, Eyebrow, H2 } from "@/components/ui";
 import { PROGRAMS, SITE, type ProgramGroup } from "@/lib/site";
+import { alternatesFor } from "@/lib/seo";
 
 export const metadata: Metadata = {
   title: { absolute: "Real Estate Investor Loans by Deal Type | Fund Your Deal" },
   description: "Real estate investor loans, project loans first: fix and flip, hard money, bridge, BRRRR and construction, then the rental loan you refinance into.",
-  alternates: { canonical: "/loans" },
+  alternates: alternatesFor("/loans"),
 };
 
 const A = "text-brand underline underline-offset-2";

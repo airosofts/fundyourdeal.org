@@ -1,11 +1,12 @@
 import type { Metadata } from "next";
 import { CashFlowCalculator } from "@/components/CashFlowCalculator";
 import { CalculatorPage } from "@/components/templates/CalculatorPage";
+import { alternatesFor } from "@/lib/seo";
 
 export const metadata: Metadata = {
   title: { absolute: "Rental Cash Flow Calculator for Investors | Fund Your Deal" },
   description: "See what a rental pays you once vacancy, management, repairs and capex come out, with the lender's DSCR next to NOI, cap rate and cash-on-cash.",
-  alternates: { canonical: "/calculators/rental-cash-flow" },
+  alternates: alternatesFor("/calculators/rental-cash-flow"),
 };
 
 export default function Page() {

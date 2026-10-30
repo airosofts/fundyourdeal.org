@@ -6,11 +6,12 @@ import { MatchedForm } from "@/components/MatchedForm";
 import { PageIntro } from "@/components/PageIntro";
 import { FaqSection, Sources } from "@/components/sections";
 import { Container, Eyebrow, H2 } from "@/components/ui";
+import { alternatesFor } from "@/lib/seo";
 
 export const metadata: Metadata = {
   title: { absolute: "Get Funding for Your Deal in 60 Seconds | Fund Your Deal" },
   description: "Start an investor loan request with your name and number, then a few taps about the deal. No credit pull to apply. Flip, bridge, BRRRR, build or rental.",
-  alternates: { canonical: "/get-funding" },
+  alternates: alternatesFor("/get-funding"),
 };
 
 const WHY: { title: string; text: string }[] = [

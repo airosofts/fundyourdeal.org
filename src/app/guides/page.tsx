@@ -6,11 +6,12 @@ import { ButtonLink, Container } from "@/components/ui";
 import { GUIDES } from "@/content/guides";
 import type { Guide } from "@/content/types";
 import { SITE } from "@/lib/site";
+import { alternatesFor } from "@/lib/seo";
 
 export const metadata: Metadata = {
   title: { absolute: "Deal Guides for Flips, BRRRR and Rentals | Fund Your Deal" },
   description: "Deal-by-deal guides for investors: ARV, rehab budgets, cash to close, hard money, bridge exits, BRRRR refinances, rental cash flow and build draws.",
-  alternates: { canonical: "/guides" },
+  alternates: alternatesFor("/guides"),
 };
 
 // Grouped the way a deal moves: find and fund the project, understand the money, then hold or refinance.

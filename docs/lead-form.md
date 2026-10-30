@@ -7,13 +7,13 @@ portal.
 
 This file is the contract between the site (`src/lib/leadSpec.ts`,
 `src/components/LeadForm.tsx`, `src/app/api/leads/route.ts`) and the admin portal
-(`~/Documents/gablefunding-adminportal`, shared with Gable Funding). Change both together.
+(`~/Documents/gablefunding-adminportal`, shared with Greenspan Lending). Change both together.
 
 ## Screens (step = 1-based position; the server re-validates every earlier screen)
 
 | Step | Screen | Asks | Values |
 |---|---|---|---|
-| 1 | `contact` | First name, last name, email (optional), mobile phone, call/text consent checkbox (required). Button "Fund My Deal" (`SUBMIT_LABEL`; Gable's says "Get Funding"). | — |
+| 1 | `contact` | First name, last name, email (optional), mobile phone, call/text consent checkbox (required). Button "Fund My Deal" (`SUBMIT_LABEL`; Greenspan's says "Get Funding"). | — |
 | 2 | `occupancy` | "Will you or a family member live in the property?" | `investment` (no, it's an investment property) · `owner` (yes) |
 | 3 | `loanType` | What are you financing? | dscr · str · flip · rehab_rental · bridge · construction · portfolio |
 | 4 | `purpose` | Buying or refinancing? | purchase · refinance · cashout (rental loans only) |

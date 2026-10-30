@@ -4,6 +4,7 @@ import { PageIntro } from "@/components/PageIntro";
 import { Prose, Todo } from "@/components/Prose";
 import { TCPA_CONSENT_TEXT } from "@/lib/consent";
 import { SITE } from "@/lib/site";
+import { alternatesFor } from "@/lib/seo";
 
 const UPDATED = "October 26, 2026";
 
@@ -11,7 +12,7 @@ export const metadata: Metadata = {
   title: "Loan Disclosures",
   description:
     "Fund Your Deal loan disclosures: business-purpose loans on investment property only, a licensed lending partner, example rates, and call and text consent.",
-  alternates: { canonical: "/disclosures" },
+  alternates: alternatesFor("/disclosures"),
 };
 
 export default function Page() {

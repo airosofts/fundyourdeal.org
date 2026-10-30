@@ -4,6 +4,7 @@ import { PageIntro } from "@/components/PageIntro";
 import { Prose, Todo } from "@/components/Prose";
 import { SUBMIT_LABEL } from "@/lib/consent";
 import { SITE } from "@/lib/site";
+import { alternatesFor } from "@/lib/seo";
 
 const UPDATED = "October 26, 2026";
 
@@ -11,7 +12,7 @@ export const metadata: Metadata = {
   title: "Terms of Use",
   description:
     "The terms for using fundyourdeal.org and requesting investment property funding from Fund Your Deal: who can apply, call and text consent, and liability.",
-  alternates: { canonical: "/terms" },
+  alternates: alternatesFor("/terms"),
 };
 
 export default function Page() {

@@ -1,11 +1,12 @@
 import type { Metadata } from "next";
 import { FlipCalculator } from "@/components/FlipCalculator";
 import { CalculatorPage } from "@/components/templates/CalculatorPage";
+import { alternatesFor } from "@/lib/seo";
 
 export const metadata: Metadata = {
   title: { absolute: "Fix and Flip Calculator With Loan Sizing | Fund Your Deal" },
   description: "Run a flip before you offer: the loan a lender sizes on price, rehab and ARV, the cash you bring, profit after every cost, and a stress test on value.",
-  alternates: { canonical: "/calculators/fix-and-flip" },
+  alternates: alternatesFor("/calculators/fix-and-flip"),
 };
 
 export default function Page() {

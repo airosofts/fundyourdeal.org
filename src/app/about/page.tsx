@@ -5,12 +5,13 @@ import { PageIntro } from "@/components/PageIntro";
 import { FaqSection, Sources } from "@/components/sections";
 import { ButtonLink, Container, Eyebrow, H2 } from "@/components/ui";
 import { SITE } from "@/lib/site";
+import { alternatesFor } from "@/lib/seo";
 
 export const metadata: Metadata = {
   title: { absolute: "About Fund Your Deal: Deal-First Investor Loans" },
   description:
     "Fund Your Deal gets investors’ deals funded: flips, hard money, bridge, BRRRR, new builds, and rental loans to refinance out. Investment property only.",
-  alternates: { canonical: "/about" },
+  alternates: alternatesFor("/about"),
 };
 
 // The moments this site is built for, and the loan that fits each one.
