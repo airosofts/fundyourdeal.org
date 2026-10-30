@@ -48,10 +48,13 @@ export const propertyTypesFor = (t: LoanType | "") => (t === "construction" ? PR
 
 // Broad bands, so the amount is a tap rather than a typed figure.
 export const LOAN_RANGES = [
-  // Roland's ranges (Oct 28). $100K–$150K wasn't in his list; it's folded into the second band until he confirms.
+  // Roland's list of six (Oct 30), the same ids and order as Gable's. An id is what gets
+  // saved, so it never changes. Retired ids (100_250 and 250_500 from Oct 28, lt150 and
+  // 150_300 earlier) can still sit on old rows; the portal knows their labels.
   { id: "lt100", label: "Under $100K", min: 0, max: 100_000 },
-  { id: "100_250", label: "$100K to $250K", min: 100_000, max: 250_000 },
-  { id: "250_500", label: "$250K to $500K", min: 250_000, max: 500_000 },
+  { id: "100_175", label: "$100K to $175K", min: 100_000, max: 175_000 },
+  { id: "175_300", label: "$175K to $300K", min: 175_000, max: 300_000 },
+  { id: "300_500", label: "$300K to $500K", min: 300_000, max: 500_000 },
   { id: "500_1m", label: "$500K to $1M", min: 500_000, max: 1_000_000 },
   { id: "1m_plus", label: "$1M or more", min: 1_000_000, max: null },
 ] as const;

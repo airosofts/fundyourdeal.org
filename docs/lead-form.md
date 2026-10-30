@@ -18,7 +18,7 @@ This file is the contract between the site (`src/lib/leadSpec.ts`,
 | 3 | `loanType` | What are you financing? | dscr · str · flip · rehab_rental · bridge · construction · portfolio |
 | 4 | `purpose` | Buying or refinancing? | purchase · refinance · cashout (rental loans only) |
 | 5 | `propertyType` | What kind of property? | sfr · 2_4 · condo · mf5 · land (construction only; no condo there) |
-| 6 | `loanRange` | How much do you need? | lt100 · 100_250 · 250_500 · 500_1m · 1m_plus (Oct 28; earlier rows may hold lt150 · 150_300 · 300_500) |
+| 6 | `loanRange` | How much do you need? | lt100 · 100_175 · 175_300 · 300_500 · 500_1m · 1m_plus (Oct 30; rows from Oct 28–30 may hold 100_250 · 250_500, older ones lt150 · 150_300) |
 | 7 | `credit` | Credit score, roughly | Under 620 · 620–675 · 675–720 · 720+ |
 | 8 | `experience` | Deals in the last 3 years (project loans only: flip, rehab_rental, bridge, construction) | 0 · 1_3 · 4_plus |
 | 9 | `zip` | Property ZIP code (5 digits) | → `completed = true` |
