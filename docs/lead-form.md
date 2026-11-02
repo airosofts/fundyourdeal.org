@@ -49,6 +49,25 @@ migration hasn't run; the same values are always in `answers`. Fund Your Deal wr
 database, and the column defaults to `'gablefunding'`, so a failed follow-up would
 otherwise file the lead under the wrong site.
 
+## Admin portal notifications (Nov 2 2026)
+
+So the portal can email the team, the site POSTs `{ event, site, id }` to `NOTIFY_URL`
+with `Authorization: Bearer NOTIFY_SECRET` (`src/lib/server/notify.ts`; `site` is
+`SITE_KEY` from `leadSpec.ts`). It runs in `after()`, once the row is saved and the
+response has gone out, with a 3-second timeout. If either env var is blank, nothing is
+sent; failures are only logged.
+
+- `lead.started` (`gf_leads.id`): the save that first stores the contact, i.e. step 1
+  of a new row.
+- `lead.completed` (`gf_leads.id`): the step-9 save. A completed row ignores later
+  saves, so this is sent once. A lead whose first successful save is step 9 gets both,
+  started first.
+- `message.received` (`gf_contact_messages.id`): a saved contact-form message, sent
+  after its `site` follow-up update.
+
+Honeypot hits, invalid input and failed saves send nothing. Owner-occupants are still
+leads, so they're notified like the rest; the portal can check `status` / `occupancy`.
+
 ## Older rows
 
 Rows saved by form v2 (Oct 21–23) used different step numbers (1 loan type … 7

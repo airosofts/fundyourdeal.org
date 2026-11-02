@@ -11,7 +11,7 @@
 // Columns that later SQL files added go in a second, best-effort update, so
 // a missing migration can never cost us the lead itself.
 
-import { NextResponse, type NextRequest } from "next/server";
+import { NextResponse, after, type NextRequest } from "next/server";
 import { ATTRIBUTION_KEYS, type Attribution } from "@/lib/attribution";
 import { BUSINESS_PURPOSE_TEXT, SHARE_CONSENT_TEXT, TCPA_CONSENT_TEXT } from "@/lib/consent";
 import {
@@ -29,6 +29,7 @@ import {
   type Answers,
 } from "@/lib/leadSpec";
 import { TABLES, airobaseConfigured, getAirobase } from "@/lib/server/airobase";
+import { notifyPortal, type PortalEvent } from "@/lib/server/notify";
 import { clientIp, readJson, requestGeo, requestMeta, toE164 } from "@/lib/server/request";
 
 type Payload = {
@@ -42,6 +43,7 @@ type Payload = {
 
 /** The row as stored. select("*") means a column from an unrun migration just comes back absent. */
 type Existing = {
+  id: string;
   last_step: number;
   completed: boolean;
   status: string;
@@ -196,5 +198,26 @@ export async function POST(req: NextRequest) {
       if (e3) console.error(`[leads] ${Object.keys(cols).join(", ")} not saved (run ${file})`, e3.message);
     }
   }
+
+  // Tell the admin portal (it emails the team) once the response has gone out, so it can't slow or break the form.
+  // started: this save is the first to store the contact (a new row, or a leftover v2 row that never reached it).
+  // completed: the final step, which only gets here once; a completed row returns early above.
+  const events: PortalEvent[] = [];
+  if (!prev?.share_consent_at) events.push("lead.started");
+  if (step === FINAL_STEP) events.push("lead.completed");
+  if (events.length) {
+    after(async () => {
+      // The portal is told the row id. A row this save created isn't in `prev` (the upsert doesn't return it), so read it back.
+      let id = prev?.id;
+      if (!id) {
+        const { data } = await db.from(TABLES.leads).select("id").eq("session_id", sessionId).maybeSingle();
+        const found = data?.id;
+        id = typeof found === "string" ? found : undefined;
+      }
+      if (!id) console.error("[leads] saved, but its id wasn't found; portal not notified", events);
+      else for (const event of events) await notifyPortal(event, id);
+    });
+  }
+
   return NextResponse.json({ success: true, completed: step === FINAL_STEP });
 }

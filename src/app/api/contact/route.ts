@@ -24,6 +24,6 @@ export async function POST(req: NextRequest) {
       const topic = str(b.topic, 40);
       return { row: { name, email, phone: str(b.phone, 40) || null, topic: TOPICS.includes(topic) ? topic : "other", message } };
     },
-    { followUp: { columns: { site: SITE_KEY }, sql: "admin portal sql/003_multi_site.sql" } }
+    { followUp: { columns: { site: SITE_KEY }, sql: "admin portal sql/003_multi_site.sql" }, notify: "message.received" }
   );
 }

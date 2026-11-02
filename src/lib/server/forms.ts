@@ -1,6 +1,7 @@
 import "server-only";
-import { NextResponse, type NextRequest } from "next/server";
+import { NextResponse, after, type NextRequest } from "next/server";
 import { airobaseConfigured, getAirobase } from "./airobase";
+import { notifyPortal, type PortalEvent } from "./notify";
 import { clientIp, readJson, requestMeta } from "./request";
 
 // The small single-POST forms (contact, rate alerts) all run through here:
@@ -19,7 +20,8 @@ export async function handleInsert(
   req: NextRequest,
   table: string,
   build: (body: Record<string, unknown>) => { row: Record<string, unknown> } | { errors: Record<string, string> },
-  opts: { onConflict?: string; followUp?: FollowUp } = {}
+  /** notify: tell the admin portal once the row is saved (plain inserts; a duplicate skipped by onConflict has no row to point to). */
+  opts: { onConflict?: string; followUp?: FollowUp; notify?: PortalEvent } = {}
 ) {
   const body = await readJson<Record<string, unknown>>(req);
   if (!body) return NextResponse.json({ success: false, error: "bad_json" }, { status: 400 });
@@ -33,8 +35,8 @@ export async function handleInsert(
     return NextResponse.json({ success: false, error: "not_configured" }, { status: 503 });
   }
   const meta = requestMeta(req);
-  // A follow-up needs to find this exact row again, so give it its id up front (the tables use uuid keys).
-  const id = opts.followUp ? crypto.randomUUID() : null;
+  // A follow-up needs to find this exact row again, and the portal is told its id, so either gets the id up front (the tables use uuid keys).
+  const id = opts.followUp || opts.notify ? crypto.randomUUID() : null;
   const row = { ...(id ? { id } : {}), ...built.row, ip_address: clientIp(req), user_agent: meta.user_agent };
   const q = getAirobase().from(table);
   const { error } = opts.onConflict ? await q.upsert(row, { onConflict: opts.onConflict, ignoreDuplicates: true }) : await q.insert(row);
@@ -43,6 +45,8 @@ export async function handleInsert(
     return NextResponse.json({ success: false, error: "db_error" }, { status: 500 });
   }
   if (id && opts.followUp) await followUp(table, id, opts.followUp);
+  const event = opts.notify;
+  if (id && event) after(() => notifyPortal(event, id)); // after the response, so it can't slow or break the form
   return NextResponse.json({ success: true });
 }
 
