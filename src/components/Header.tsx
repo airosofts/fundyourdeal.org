@@ -1,11 +1,12 @@
 import Link from "next/link";
 import { NAV, SITE } from "@/lib/site";
+import { LenderLogin } from "./LenderLogin";
 import { Logo } from "./Logo";
 import { MenuCloser } from "./MenuCloser";
-import { ButtonLink } from "./ui";
 
-// A navy bar with an orange CTA. The inline nav needs about 1,000px, so below xl it folds into
-// a menu: a native <details>, closed after each navigation by MenuCloser.
+// A navy bar with an orange "Lender Login" (the portal's sign-in, as a pop-up; borrowers get
+// the funding form on the page itself). The inline nav needs about 1,000px, so below xl it
+// folds into a menu: a native <details>, closed after each navigation by MenuCloser.
 export function Header() {
   return (
     <header className="sticky top-0 z-40 border-b border-night-line bg-ink text-paper">
@@ -19,14 +20,10 @@ export function Header() {
           ))}
         </nav>
         <div className="flex items-center gap-2">
-          <a href={`${SITE.portal}/login`} className="hidden whitespace-nowrap rounded-full px-3.5 py-2 text-[15px] font-semibold transition-colors hover:bg-night hover:text-lime focus-visible:outline-lime sm:block">
-            Log in
-          </a>
-          <div className="hidden sm:block">
-            <ButtonLink href="/get-funding" className="whitespace-nowrap focus-visible:outline-lime">
-              {SITE.cta}
-            </ButtonLink>
-          </div>
+          <LenderLogin
+            autoOpen
+            className="inline-flex min-h-11 cursor-pointer items-center justify-center whitespace-nowrap rounded-full bg-brand px-4 text-[15px] font-bold tracking-[-0.01em] text-white transition-colors hover:bg-brand-deep focus-visible:outline-lime sm:px-5"
+          />
           <details className="relative xl:hidden">
             <MenuCloser />
             <summary aria-label="Menu" className="flex size-11 items-center justify-center rounded-full border border-night-line hover:bg-night focus-visible:outline-lime">
@@ -40,9 +37,6 @@ export function Header() {
                   {n.label}
                 </Link>
               ))}
-              <a href={`${SITE.portal}/login`} className="rounded-xl px-4 py-3 text-[15px] font-semibold hover:bg-brand-tint hover:text-brand sm:hidden">
-                Log in
-              </a>
               <Link href="/get-funding" className="mt-1.5 rounded-full bg-brand px-4 py-3 text-center text-[15px] font-bold text-white hover:bg-brand-deep">
                 {SITE.cta}
               </Link>
