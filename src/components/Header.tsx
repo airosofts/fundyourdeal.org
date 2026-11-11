@@ -19,6 +19,9 @@ export function Header() {
           ))}
         </nav>
         <div className="flex items-center gap-2">
+          <a href={`${SITE.portal}/login`} className="hidden whitespace-nowrap rounded-full px-3.5 py-2 text-[15px] font-semibold transition-colors hover:bg-night hover:text-lime focus-visible:outline-lime sm:block">
+            Log in
+          </a>
           <div className="hidden sm:block">
             <ButtonLink href="/get-funding" className="whitespace-nowrap focus-visible:outline-lime">
               {SITE.cta}
@@ -37,6 +40,9 @@ export function Header() {
                   {n.label}
                 </Link>
               ))}
+              <a href={`${SITE.portal}/login`} className="rounded-xl px-4 py-3 text-[15px] font-semibold hover:bg-brand-tint hover:text-brand sm:hidden">
+                Log in
+              </a>
               <Link href="/get-funding" className="mt-1.5 rounded-full bg-brand px-4 py-3 text-center text-[15px] font-bold text-white hover:bg-brand-deep">
                 {SITE.cta}
               </Link>

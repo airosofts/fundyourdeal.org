@@ -11,6 +11,8 @@ export const SITE = {
   tagline: "Deal on the clock? Fund the flip, bridge, BRRRR or build, then refinance into a rental loan.",
   email: "hello@fundyourdeal.org",
   cta: "Fund My Deal",
+  // The demo portal lenders sign in to (phone number and a texted code). The header's "Log in" opens it.
+  portal: (process.env.NEXT_PUBLIC_PORTAL_URL || "https://portal.fundyourdeal.org").replace(/\/$/, ""),
   // Search engines stay out until launch: set NEXT_PUBLIC_INDEXABLE=true on the live domain.
   indexable: process.env.NEXT_PUBLIC_INDEXABLE === "true",
 };
