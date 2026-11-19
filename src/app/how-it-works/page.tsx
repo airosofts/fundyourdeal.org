@@ -5,7 +5,7 @@ import { PageIntro } from "@/components/PageIntro";
 import { CompareTable, FaqSection, Sources } from "@/components/sections";
 import { ButtonLink, Check, Container, Eyebrow, H2 } from "@/components/ui";
 import { OCCUPANCY_ANSWERS, OCCUPANCY_QUESTION, SHARE_CONSENT_TEXT, SUBMIT_LABEL, TCPA_CONSENT_TEXT } from "@/lib/consent";
-import { CREDIT, EXPERIENCE, LOAN_RANGES, LOAN_TYPES, PROPERTY_TYPES, PURPOSES } from "@/lib/leadSpec";
+import { CREDIT, EXPERIENCE, FORM_LOAN_TYPES, LOAN_RANGES, LOAN_TYPES, PROPERTY_TYPES, PURPOSES } from "@/lib/leadSpec";
 import { SITE } from "@/lib/site";
 import { alternatesFor } from "@/lib/seo";
 
@@ -33,8 +33,8 @@ const TAPS: { ask: string; why: string; options: readonly string[] }[] = [
     why: "Fund Your Deal funds investment property only. Answering no confirms the loan is for a business purpose. A property you or a relative will occupy needs a residential mortgage lender instead.",
     options: Object.values(OCCUPANCY_ANSWERS),
   },
-  { ask: "The kind of deal", why: "Picks the loan program, and with it the questions that follow.", options: labels(LOAN_TYPES) },
-  { ask: "Purchase or refinance", why: "Cash-out appears for rental loans only. Flips, BRRRR and new builds buy or refinance.", options: labels(PURPOSES) },
+  { ask: "The kind of deal", why: "Picks the loan program, and with it the questions that follow.", options: labels(LOAN_TYPES.filter((t) => FORM_LOAN_TYPES.includes(t.id))) },
+  { ask: "Purchase or refinance", why: "Cash-out appears for rental loans only. Flips, hard money, BRRRR and new builds buy or refinance.", options: labels(PURPOSES) },
   { ask: "The property type", why: "Land shows up only for new construction, and condos drop off that list.", options: labels(PROPERTY_TYPES) },
   { ask: "How much funding the deal needs", why: "A range is enough here. You settle the exact amount with the loan specialist.", options: labels(LOAN_RANGES) },
   { ask: "Your credit score, roughly", why: "You pick a band yourself. Nothing is pulled from a credit bureau.", options: CREDIT },

@@ -67,7 +67,7 @@ export const PROGRAMS: Program[] = [
     bestFor: "Fast closings on property banks pass on",
     qualifies: "The property's value and how you'll repay",
     term: "6–24 months, interest-only",
-    preset: { loanType: "flip" },
+    preset: { loanType: "hard_money" },
   },
   {
     slug: "bridge",

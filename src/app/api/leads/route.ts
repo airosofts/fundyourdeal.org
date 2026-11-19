@@ -29,6 +29,7 @@ import {
   type Answers,
 } from "@/lib/leadSpec";
 import { TABLES, airobaseConfigured, getAirobase } from "@/lib/server/airobase";
+import { sendToLivePortal } from "@/lib/server/livePortal";
 import { notifyPortal, type PortalEvent } from "@/lib/server/notify";
 import { clientIp, readJson, requestGeo, requestMeta, toE164 } from "@/lib/server/request";
 
@@ -205,19 +206,19 @@ export async function POST(req: NextRequest) {
   const events: PortalEvent[] = [];
   if (!prev?.share_consent_at) events.push("lead.started");
   if (step === FINAL_STEP) events.push("lead.completed");
-  if (events.length) {
-    after(async () => {
-      // The portal is told the row id. A row this save created isn't in `prev` (the upsert doesn't return it), so read it back.
-      let id = prev?.id;
-      if (!id) {
-        const { data } = await db.from(TABLES.leads).select("id").eq("session_id", sessionId).maybeSingle();
-        const found = data?.id;
-        id = typeof found === "string" ? found : undefined;
-      }
-      if (!id) console.error("[leads] saved, but its id wasn't found; portal not notified", events);
-      else for (const event of events) await notifyPortal(event, id);
-    });
-  }
+  after(async () => {
+    // Both portals need the row as stored: a row this save created isn't in `prev` (the upsert doesn't return it).
+    const { data } = await db.from(TABLES.leads).select("*").eq("session_id", sessionId).maybeSingle();
+    const saved = (data ?? null) as Record<string, unknown> | null;
+    const id = typeof saved?.id === "string" ? saved.id : undefined;
+    if (!saved || !id) {
+      console.error("[leads] saved, but the row wasn't found; portals not told", events);
+      return;
+    }
+    // portal.fundyourdeal.org gets every save; the shared portal only the two events.
+    await sendToLivePortal(saved, events);
+    for (const event of events) await notifyPortal(event, id);
+  });
 
   return NextResponse.json({ success: true, completed: step === FINAL_STEP });
 }

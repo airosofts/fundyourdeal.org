@@ -15,12 +15,12 @@ This file is the contract between the site (`src/lib/leadSpec.ts`,
 |---|---|---|---|
 | 1 | `contact` | First name, last name, email (optional), mobile phone, call/text consent checkbox (required). Button "Fund My Deal" (`SUBMIT_LABEL`; Goldstein's says "Get Funding"). | — |
 | 2 | `occupancy` | "Will you or a family member live in the property?" | `investment` (no, it's an investment property) · `owner` (yes) |
-| 3 | `loanType` | What are you financing? | dscr · str · flip · rehab_rental · bridge · construction · portfolio |
-| 4 | `purpose` | Buying or refinancing? | purchase · refinance · cashout (rental loans only) |
+| 3 | `loanType` | What kind of deal is it? | Buttons (Roland, Nov 18 2026): dscr · hard_money · flip · bridge · construction. A program page's preset can also save str · rehab_rental · portfolio |
+| 4 | `purpose` | Purchase or refinance? | purchase · refinance · cashout (rental loans only) |
 | 5 | `propertyType` | What kind of property? | sfr · 2_4 · condo · mf5 · land (construction only; no condo there) |
 | 6 | `loanRange` | How much do you need? | lt100 · 100_175 · 175_300 · 300_500 · 500_1m · 1m_plus (Oct 30; rows from Oct 28–30 may hold 100_250 · 250_500, older ones lt150 · 150_300) |
 | 7 | `credit` | Credit score, roughly | Under 620 · 620–675 · 675–720 · 720+ |
-| 8 | `experience` | Deals in the last 3 years (project loans only: flip, rehab_rental, bridge, construction) | 0 · 1_3 · 4_plus |
+| 8 | `experience` | Deals in the last 3 years (project loans only: flip, hard_money, rehab_rental, bridge, construction) | 0 · 1_3 · 4_plus |
 | 9 | `zip` | Property ZIP code (5 digits) | → `completed = true` |
 
 `FINAL_STEP = 9`. Program pages may preset loan type / purpose / property type;
@@ -67,6 +67,20 @@ sent; failures are only logged.
 
 Honeypot hits, invalid input and failed saves send nothing. Owner-occupants are still
 leads, so they're notified like the rest; the portal can check `status` / `occupancy`.
+
+## Fund Your Deal portal (Nov 20 2026)
+
+Every save (not only the two events) also goes to portal.fundyourdeal.org, which
+keeps its own copy and lists it with its live leads
+(`src/lib/server/livePortal.ts`): `POST PORTAL_INGEST_URL` (default
+`https://portal.fundyourdeal.org/api/ingest`) with `Authorization: Bearer
+PORTAL_INGEST_SECRET` and `{ lead, events }`, where `lead` is the whole `gf_leads`
+row as stored. Same rules as the notifications: in `after()`, 4-second timeout,
+nothing sent without the secret, failures only logged. The portal's side is
+`app/api/ingest/route.ts` in ~/Documents/fundmydeal-demo.
+
+`hard_money` (Nov 20) is new in both portals: the shared one labels it "Hard money"
+and matches it to lenders that do hard money, fix & flip or bridge.
 
 ## Older rows
 

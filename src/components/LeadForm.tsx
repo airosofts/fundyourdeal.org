@@ -18,6 +18,7 @@ import {
   CREDIT,
   EMPTY_ANSWERS,
   EXPERIENCE,
+  FORM_LOAN_TYPES,
   LOAN_RANGES,
   LOAN_TYPES,
   OCCUPANCIES,
@@ -75,7 +76,8 @@ function optionsFor(screen: TapScreen, a: Answers): { value: string; label: stri
     case "occupancy":
       return OCCUPANCIES.map((o) => ({ value: o, label: OCCUPANCY_ANSWERS[o] }));
     case "loanType":
-      return LOAN_TYPES.map((t) => ({ value: t.id, label: t.label, hint: t.hint }));
+      // Roland's five, plus a program page's preset type (BRRRR, short-term rental, portfolio) when the visitor steps back to it.
+      return LOAN_TYPES.filter((t) => FORM_LOAN_TYPES.includes(t.id) || t.id === a.loanType).map((t) => ({ value: t.id, label: t.label, hint: t.hint }));
     case "purpose":
       return purposesFor(a.loanType).map((p) => ({ value: p.id, label: p.label }));
     case "propertyType":
@@ -356,12 +358,17 @@ export function LeadForm({ variant = "card", preset }: { variant?: "card" | "pag
             </label>
           ))}
         </fieldset>
-        <div className="flex items-center justify-between gap-3 border-t border-line pt-4">
-          {canGoBack ? <BackButton onClick={back} /> : <span />}
-          <button type="button" disabled={!value} onClick={() => advance(at, a)} className="min-h-11 rounded-full bg-brand px-6 text-[15px] font-bold text-white hover:bg-brand-deep disabled:bg-line disabled:text-muted">
-            Next
-          </button>
-        </div>
+        {(canGoBack || value) && (
+          <div className="flex items-center justify-between gap-3 border-t border-line pt-4">
+            {canGoBack ? <BackButton onClick={back} /> : <span />}
+            {/* A tap moves on by itself (Roland, Nov 18: one click per step), so Next shows only on a screen already answered, after Back. */}
+            {value && (
+              <button type="button" onClick={() => advance(at, a)} className="min-h-11 rounded-full bg-brand px-6 text-[15px] font-bold text-white hover:bg-brand-deep">
+                Next
+              </button>
+            )}
+          </div>
+        )}
       </div>
     );
   }

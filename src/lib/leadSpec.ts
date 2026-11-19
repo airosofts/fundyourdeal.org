@@ -14,28 +14,35 @@
 /** Written to gf_leads.site, answers.site and the site column of the inbox tables; the portal's site switcher filters on it. */
 export const SITE_KEY = "fundyourdeal";
 
-export type LoanType = "dscr" | "str" | "flip" | "rehab_rental" | "bridge" | "construction" | "portfolio";
+export type LoanType = "dscr" | "hard_money" | "str" | "flip" | "rehab_rental" | "bridge" | "construction" | "portfolio";
 
-// Rental hints say what DSCR means in plain words: the rent has to cover the payment.
+// Every loan type the form can save. Labels lead with the loan's own name, so a
+// visitor looking for DSCR sees "DSCR loan" (Roland, Nov 18: he found no DSCR button).
 export const LOAN_TYPES: { id: LoanType; label: string; hint: string }[] = [
+  { id: "dscr", label: "DSCR loan", hint: "Rental property · rent covers the payment" },
+  { id: "hard_money", label: "Hard money loan", hint: "Short-term · based on the property" },
   { id: "flip", label: "Fix and flip", hint: "Buy it, renovate it, sell it" },
   { id: "bridge", label: "Bridge loan", hint: "Short-term · close on time" },
-  { id: "rehab_rental", label: "BRRRR deal", hint: "Rehab, rent, refinance out" },
-  { id: "construction", label: "Ground-up build", hint: "New construction · draws" },
-  { id: "dscr", label: "Long-term rental", hint: "DSCR · rent covers the payment" },
-  { id: "str", label: "Airbnb or vacation rental", hint: "DSCR · bookings cover the payment" },
-  { id: "portfolio", label: "A group of rentals", hint: "One loan · rents cover the payments" },
+  { id: "construction", label: "New construction", hint: "Ground-up build · draws" },
+  { id: "str", label: "Short-term rental loan", hint: "DSCR · bookings cover the payment" },
+  { id: "rehab_rental", label: "BRRRR loan", hint: "Rehab, rent, refinance out" },
+  { id: "portfolio", label: "Portfolio loan", hint: "One loan · rents cover the payments" },
 ];
 
+/** The buttons on the loan-type screen (Roland's list, Nov 18). The other types are set only by a program page's preset. */
+export const FORM_LOAN_TYPES: LoanType[] = ["dscr", "hard_money", "flip", "bridge", "construction"];
+export const loanTypeLabel = (t: string) => LOAN_TYPES.find((x) => x.id === t)?.label;
+
 export const PURPOSES = [
-  { id: "purchase", label: "Buying the property" },
-  { id: "refinance", label: "Refinancing one I own" },
-  { id: "cashout", label: "Cash-out refi: pull equity out" },
+  { id: "purchase", label: "Purchase" },
+  { id: "refinance", label: "Refinance" },
+  { id: "cashout", label: "Cash-out refinance" },
 ] as const;
 export type Purpose = (typeof PURPOSES)[number]["id"];
 
-/** Project loans (flip, BRRRR, build) buy or refinance; taking cash out is a rental-loan option. */
-export const purposesFor = (t: LoanType | "") => (t === "flip" || t === "construction" || t === "rehab_rental" ? PURPOSES.filter((p) => p.id !== "cashout") : PURPOSES);
+/** Project loans (flip, hard money, BRRRR, build) buy or refinance; taking cash out is a rental-loan option. */
+export const purposesFor = (t: LoanType | "") =>
+  t === "flip" || t === "hard_money" || t === "construction" || t === "rehab_rental" ? PURPOSES.filter((p) => p.id !== "cashout") : PURPOSES;
 
 export const PROPERTY_TYPES = [
   { id: "sfr", label: "Single-family house" },
@@ -66,8 +73,8 @@ export const EXPERIENCE = [
   { id: "4_plus", label: "4 deals or more" },
 ] as const;
 
-/** Only project loans (flip, BRRRR, bridge, build) ask about track record; rental loans skip the screen. */
-export const isProject = (t: LoanType | "") => t === "flip" || t === "rehab_rental" || t === "bridge" || t === "construction";
+/** Only project loans (flip, hard money, BRRRR, bridge, build) ask about track record; rental loans skip the screen. */
+export const isProject = (t: LoanType | "") => t === "flip" || t === "hard_money" || t === "rehab_rental" || t === "bridge" || t === "construction";
 
 /** Step 2 answers. Picking "investment" is the business-purpose certification; an "owner" answer is kept and the portal flags it. */
 export const OCCUPANCIES = ["investment", "owner"] as const;
