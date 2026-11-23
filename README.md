@@ -50,7 +50,7 @@ Listed in `.env.example`. Set them on the host. The `NEXT_PUBLIC_*` values are b
 | `AIROBASE_SECRET_KEY` | Secret key, server-only, which bypasses row-level security. Never expose it to the browser. `src/lib/server/airobase.ts` is `server-only` for that reason. |
 | `NEXT_PUBLIC_SITE_URL` | Canonical origin, `https://fundyourdeal.org`. Used for canonical URLs, the sitemap and Open Graph tags. |
 | `NEXT_PUBLIC_INDEXABLE` | `true` on the live domain only. Any other value makes every page `noindex` and blocks crawlers in robots.txt. |
-| `NEXT_PUBLIC_GTM_ID` | Google Tag Manager container. Form events land in the dataLayer: `gf_lead_submitted` at step 1 (count this one as the conversion), `gf_lead_step` after each tap, and `gf_lead_completed` at step 9. |
+| `NEXT_PUBLIC_GTM_ID` | Optional: overrides the Google Tag Manager container (default `GTM-WQQ4ZCQN`, which runs GA4 `G-DNPJJNWTS7`). dataLayer events: `gf_lead_submitted` at step 1 (count this one as the conversion), `gf_lead_step` after each tap, `gf_lead_completed` at step 9, `gf_form_start` on the first tap or keystroke in the form, and `gf_calculator_used` (with `calculator`: dscr, fix-and-flip, brrrr, rental-cash-flow) on a calculator's first change. |
 
 ## Visit tracking
 

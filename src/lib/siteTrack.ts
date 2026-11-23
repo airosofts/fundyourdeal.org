@@ -159,8 +159,11 @@ export function trackPageview(pathname: string): void {
 export function trackEvent(type: "calculator" | "form_start", detail?: string): void {
   try {
     const key = `${type}:${detail ?? ""}`;
-    if (!tracking || sentThisView.has(key)) return;
+    if (sentThisView.has(key)) return;
     sentThisView.add(key);
+    // The same moment for Google Analytics, through Tag Manager (src/components/Analytics.tsx).
+    (window as unknown as { dataLayer?: unknown[] }).dataLayer?.push(type === "calculator" ? { event: "gf_calculator_used", calculator: detail } : { event: "gf_form_start" });
+    if (!tracking) return;
     const e = event(type, session().id);
     if (detail) e.detail = detail;
     enqueue(e);
