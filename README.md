@@ -52,6 +52,15 @@ Listed in `.env.example`. Set them on the host. The `NEXT_PUBLIC_*` values are b
 | `NEXT_PUBLIC_INDEXABLE` | `true` on the live domain only. Any other value makes every page `noindex` and blocks crawlers in robots.txt. |
 | `NEXT_PUBLIC_GTM_ID` | Google Tag Manager container. Form events land in the dataLayer: `gf_lead_submitted` at step 1 (count this one as the conversion), `gf_lead_step` after each tap, and `gf_lead_completed` at step 9. |
 
+## Visit tracking
+
+There's no Google Analytics tag on the live site, so the site counts its own visits for the portal's Analytics page. The contract is in the portal repo, `docs/site-analytics.md`, under "Site → portal".
+
+- **What the browser sends** (`src/lib/siteTrack.ts`, mounted by `src/components/VisitTracker.tsx` in the root layout): a `pageview` on the first load and on every in-site navigation, with the path only and no query string. It also sends `calculator` (`dscr`, `fix-and-flip`, `brrrr` or `rental-cash-flow`) on a calculator's first input change, and `form_start` on the lead form's first tap or keystroke, each once per page view. Every event carries a random browser id (`fyd_vid`), a visit id (`fyd_sid`, new after 30 minutes idle) and the lead form's `gf_session_id`, which is how the portal ties a lead to the visits before it. The first page of a visit adds the outside referrer (no query string), the UTM source, medium and campaign, and the name of any click id on the link (`gclid`, `gbraid`, `wbraid`, `msclkid`, `fbclid`), never its value. Events go out with `sendBeacon` to `/api/t`.
+- **What `/api/t` forwards** (`src/app/api/t/route.ts`): it drops bots, keeps only the contract's fields, adds the device type (`mobile`, `tablet` or `desktop`), the country from Cloudflare's `cf-ipcountry` and the time, and answers 204 straight away. After that it posts the batch to the portal with `PORTAL_INGEST_SECRET` (`sendVisitsToPortal` in `src/lib/server/livePortal.ts`). Without the secret nothing is sent. No IP address is read, kept or forwarded.
+- **`PORTAL_VISITS_URL`** (optional, server-only): where the visits go. By default it's `PORTAL_INGEST_URL` with `/api/ingest` changed to `/api/ingest/visits`, or `https://portal.fundyourdeal.org/api/ingest/visits` when that isn't set either.
+- **Not counted:** any host other than fundyourdeal.org (localhost and previews included), automated browsers, and anyone who opened a page with `?notrack=1`. The flag stays in that browser, so Roland and the team can open the site once with it to leave their own visits out. `?notrack=0` turns counting back on.
+
 ## Deploying
 
 - **Build:** this is a standard Next.js 16 app on Node 20.9 or later. Build with `npm run build` and serve with `npm run start`, or use any host that runs Next.js (see `node_modules/next/dist/docs/01-app/01-getting-started/17-deploying.md`).

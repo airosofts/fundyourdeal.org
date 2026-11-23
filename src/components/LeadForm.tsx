@@ -14,6 +14,7 @@ import { useEffect, useId, useRef, useState, type ReactNode } from "react";
 import { captureAttribution, getAttribution, getSessionId, startNewSession } from "@/lib/attribution";
 import { OCCUPANCY_ANSWERS, OCCUPANCY_QUESTION, SHARE_CONSENT_TEXT, SUBMIT_LABEL, TCPA_CONSENT_TEXT } from "@/lib/consent";
 import { SITE } from "@/lib/site";
+import { trackEvent } from "@/lib/siteTrack";
 import {
   CREDIT,
   EMPTY_ANSWERS,
@@ -373,8 +374,10 @@ export function LeadForm({ variant = "card", preset }: { variant?: "card" | "pag
     );
   }
 
+  // The first tap or keystroke in the form counts as starting it (siteTrack sends it once per page view).
+  const started = () => trackEvent("form_start");
   const card = (
-    <div className="flex flex-col gap-5">
+    <div className="flex flex-col gap-5" onPointerDown={started} onKeyDown={started}>
       {!done && screen !== "contact" && (
         <div className="flex flex-col gap-2">
           <div className="flex justify-between font-mono text-[12px] text-ink-2">

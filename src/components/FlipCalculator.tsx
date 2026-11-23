@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { flipDeal, num, pctFmt, usd } from "@/lib/finance";
+import { trackEvent } from "@/lib/siteTrack";
 import { Breakdown, CalcCta, CalcGrid, Group, InputsCard, Num, ResultCard, Stats } from "./calc/parts";
 
 // Defaults are the worked deal on /calculators/fix-and-flip (Oct 2026 terms):
@@ -21,7 +22,10 @@ export function FlipCalculator() {
     sellCostPct: "6.5",
     holding: "540",
   });
-  const on = (k: keyof typeof v) => (e: React.ChangeEvent<HTMLInputElement>) => setV((x) => ({ ...x, [k]: e.target.value }));
+  const on = (k: keyof typeof v) => (e: React.ChangeEvent<HTMLInputElement>) => {
+    trackEvent("calculator", "fix-and-flip"); // the first change in a page view counts as using the calculator (siteTrack sends it once)
+    setV((x) => ({ ...x, [k]: e.target.value }));
+  };
 
   const d = flipDeal({
     price: num(v.price),

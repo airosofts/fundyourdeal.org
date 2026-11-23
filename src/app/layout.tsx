@@ -7,6 +7,7 @@ import { JsonLd } from "@/components/ui";
 import { SITE } from "@/lib/site";
 import { DESCRIPTION, FEED_TYPES, OG_SITE, ORG_ID, WEBSITE_ID } from "@/lib/seo";
 import { Analytics } from "@/components/Analytics";
+import { VisitTracker } from "@/components/VisitTracker";
 import "./globals.css";
 
 // Plus Jakarta Sans for text, JetBrains Mono for figures. The variable names are the ones
@@ -74,6 +75,7 @@ export default function RootLayout({ children }: Readonly<{ children: ReactNode 
         </main>
         <Footer />
         <Analytics />
+        <VisitTracker />
       </body>
     </html>
   );

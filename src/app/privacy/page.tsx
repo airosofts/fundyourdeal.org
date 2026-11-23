@@ -6,7 +6,7 @@ import { SUBMIT_LABEL } from "@/lib/consent";
 import { SITE } from "@/lib/site";
 import { alternatesFor } from "@/lib/seo";
 
-const UPDATED = "October 26, 2026";
+const UPDATED = "November 23, 2026";
 
 export const metadata: Metadata = {
   title: "Privacy Policy",
@@ -77,6 +77,10 @@ export default function Page() {
         <p>
           We use Google Tag Manager, which can run tools such as Google Analytics 4 and Google Ads conversion tracking. These tools use cookies and similar technologies to measure
           how the site is used and which ads lead to loan requests.
+        </p>
+        <p>
+          We also count visits ourselves to improve the site: the pages viewed, how the visitor arrived, the type of device and the country, tied to a random ID stored in the
+          browser, with no IP address kept.
         </p>
         <p>Your browser settings let you block or delete cookies. Some features may not work without them.</p>
 

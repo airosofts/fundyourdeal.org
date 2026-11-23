@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { brrrrDeal, num, pctFmt, usd } from "@/lib/finance";
+import { trackEvent } from "@/lib/siteTrack";
 import { Scale, coverageCall } from "./DscrCalculator";
 import { Breakdown, CalcCta, CalcGrid, Group, InputsCard, Num, ResultCard, Stats } from "./calc/parts";
 
@@ -28,7 +29,10 @@ export function BrrrrCalculator() {
     upkeepPct: "8",
     mgmtPct: "7",
   });
-  const on = (k: keyof typeof v) => (e: React.ChangeEvent<HTMLInputElement>) => setV((x) => ({ ...x, [k]: e.target.value }));
+  const on = (k: keyof typeof v) => (e: React.ChangeEvent<HTMLInputElement>) => {
+    trackEvent("calculator", "brrrr"); // the first change in a page view counts as using the calculator (siteTrack sends it once)
+    setV((x) => ({ ...x, [k]: e.target.value }));
+  };
   const d = brrrrDeal({
     price: num(v.price),
     rehab: num(v.rehab),

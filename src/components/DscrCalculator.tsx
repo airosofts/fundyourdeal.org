@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Breakdown, CalcCta, CalcGrid, Group, InputsCard, Num, ResultCard, Segmented, Stats } from "./calc/parts";
 import { dscrVerdict, maxLoanForDscr, monthlyPI, num, usd } from "@/lib/finance";
+import { trackEvent } from "@/lib/siteTrack";
 
 /** Fund Your Deal's words for the lender bands in dscrVerdict (same thresholds: 1.00 and 1.25). */
 const COVERAGE = {
@@ -20,7 +21,12 @@ export function DscrCalculator() {
   const [v, setV] = useState({ rent: "2050", price: "265000", down: "25", rate: "7.75", taxes: "3060", ins: "1620", hoa: "0" });
   const [term, setTerm] = useState<30 | 40>(30);
   const [io, setIo] = useState(false);
-  const on = (k: keyof typeof v) => (e: React.ChangeEvent<HTMLInputElement>) => setV((x) => ({ ...x, [k]: e.target.value }));
+  // The first change in a page view counts as using the calculator (siteTrack sends it once).
+  const used = () => trackEvent("calculator", "dscr");
+  const on = (k: keyof typeof v) => (e: React.ChangeEvent<HTMLInputElement>) => {
+    used();
+    setV((x) => ({ ...x, [k]: e.target.value }));
+  };
 
   const rent = num(v.rent), price = num(v.price), down = Math.min(num(v.down), 100), rate = num(v.rate);
   const loan = price * (1 - down / 100);
@@ -42,9 +48,26 @@ export function DscrCalculator() {
             <Num id="price" label="Price or appraised value" prefix="$" value={v.price} onChange={on("price")} />
             <Num id="down" label="Cash down" suffix="%" value={v.down} onChange={on("down")} />
             <Num id="rate" label="Note rate" suffix="%" step="0.125" value={v.rate} onChange={on("rate")} />
-            <Segmented label="Loan term" value={term} options={[{ v: 30, l: "30-year" }, { v: 40, l: "40-year" }]} onChange={(x) => setTerm(x as 30 | 40)} mono />
+            <Segmented
+              label="Loan term"
+              value={term}
+              options={[{ v: 30, l: "30-year" }, { v: 40, l: "40-year" }]}
+              onChange={(x) => {
+                used();
+                setTerm(x as 30 | 40);
+              }}
+              mono
+            />
           </div>
-          <Segmented label="How it pays" value={io ? "io" : "amort"} options={[{ v: "amort", l: "Principal and interest" }, { v: "io", l: "Interest only" }]} onChange={(x) => setIo(x === "io")} />
+          <Segmented
+            label="How it pays"
+            value={io ? "io" : "amort"}
+            options={[{ v: "amort", l: "Principal and interest" }, { v: "io", l: "Interest only" }]}
+            onChange={(x) => {
+              used();
+              setIo(x === "io");
+            }}
+          />
         </Group>
         <Group legend="Taxes, insurance and HOA">
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">

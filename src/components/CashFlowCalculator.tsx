@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { num, pctFmt, rentalDeal, usd } from "@/lib/finance";
 import { SITE } from "@/lib/site";
+import { trackEvent } from "@/lib/siteTrack";
 import { Breakdown, CalcCta, CalcGrid, Group, InputsCard, Num, ResultCard, Segmented, Stats } from "./calc/parts";
 
 export function CashFlowCalculator() {
@@ -22,7 +23,12 @@ export function CashFlowCalculator() {
     capexPct: "6",
   });
   const [term, setTerm] = useState<30 | 40>(30);
-  const on = (k: keyof typeof v) => (e: React.ChangeEvent<HTMLInputElement>) => setV((x) => ({ ...x, [k]: e.target.value }));
+  // The first change in a page view counts as using the calculator (siteTrack sends it once).
+  const used = () => trackEvent("calculator", "rental-cash-flow");
+  const on = (k: keyof typeof v) => (e: React.ChangeEvent<HTMLInputElement>) => {
+    used();
+    setV((x) => ({ ...x, [k]: e.target.value }));
+  };
   const d = rentalDeal({
     price: num(v.price),
     downPct: Math.min(num(v.downPct), 100),
@@ -51,7 +57,16 @@ export function CashFlowCalculator() {
             <Num id="rate" label="Note rate" suffix="%" step="0.125" value={v.rate} onChange={on("rate")} />
             <Num id="closingPct" label="Closing to buy" suffix="%" value={v.closingPct} onChange={on("closingPct")} />
           </div>
-          <Segmented label="Loan term" value={term} options={[{ v: 30, l: "30-year" }, { v: 40, l: "40-year" }]} onChange={(x) => setTerm(x as 30 | 40)} mono />
+          <Segmented
+            label="Loan term"
+            value={term}
+            options={[{ v: 30, l: "30-year" }, { v: 40, l: "40-year" }]}
+            onChange={(x) => {
+              used();
+              setTerm(x as 30 | 40);
+            }}
+            mono
+          />
         </Group>
         <Group legend="Money in">
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
